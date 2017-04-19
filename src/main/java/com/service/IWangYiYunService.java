@@ -1,5 +1,6 @@
 package com.service;
 
+import com.model.common.ResultDTO;
 import com.webmargic.vo.CommentVO;
 
 /**
@@ -10,5 +11,10 @@ import com.webmargic.vo.CommentVO;
 public interface IWangYiYunService {
     public void insertMusic(CommentVO vo);
 
-    public void crawler();
+    /**
+     * 网易云歌手或者歌曲url地址
+     *
+     * @param url
+     */
+    public ResultDTO wyyCrawler(String url);
 }

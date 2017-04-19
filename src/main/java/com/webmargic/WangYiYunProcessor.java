@@ -39,11 +39,17 @@ import java.util.Map;
  **/
 public class WangYiYunProcessor implements PageProcessor {
 
+
+    // 1. 周杰伦歌曲评论地址:http://music.163.com/artist?id=6452
+
+
     private IWangYiYunService wangYiYunService;
 
+    private String url;
 
-    public WangYiYunProcessor(IWangYiYunService wangYiYunService) {
+    public WangYiYunProcessor(IWangYiYunService wangYiYunService,String url) {
         this.wangYiYunService = wangYiYunService;
+        this.url = url;
     }
 
     private Site site;
@@ -215,7 +221,7 @@ public class WangYiYunProcessor implements PageProcessor {
     public Site getSite() {
         if (site == null) {
             //http://music.163.com/discover/toplist  -- 排行榜
-            site = Site.me().setDomain("163.com").addStartUrl("http://music.163.com/artist?id=6452")
+            site = Site.me().setDomain("163.com").addStartUrl(url)
                     .setUserAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_2) AppleWebKit/537.31 (KHTML, like Gecko) Chrome/26.0.1410.65 Safari/537.31");
         }
         return site;

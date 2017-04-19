@@ -1,0 +1,99 @@
+// 知乎答题接口
+
+  {
+  	"paging": {
+  		"is_end": false,
+  		--总数
+  		"totals": 3121,
+  		"previous": "http://www.zhihu.com/api/v4/questions/33178973/answers?sort_by=default&include=data%5B%2A%5D.is_normal%2Cis_sticky%2Ccollapsed_by%2Csuggest_edit%2Ccomment_count%2Ccan_comment%2Ccontent%2Ceditable_content%2Cvoteup_count%2Creshipment_settings%2Ccomment_permission%2Cmark_infos%2Ccreated_time%2Cupdated_time%2Crelationship.is_authorized%2Cis_author%2Cvoting%2Cis_thanked%2Cis_nothelp%2Cupvoted_followees%3Bdata%5B%2A%5D.author.is_blocking%2Cis_blocked%2Cis_followed%2Cvoteup_count%2Cmessage_thread_token%2Cbadge%5B%3F%28type%3Dbest_answerer%29%5D.topics&limit=20&offset=0",
+  		"is_start": true,
+  		"next": "http://www.zhihu.com/api/v4/questions/33178973/answers?sort_by=default&include=data%5B%2A%5D.is_normal%2Cis_sticky%2Ccollapsed_by%2Csuggest_edit%2Ccomment_count%2Ccan_comment%2Ccontent%2Ceditable_content%2Cvoteup_count%2Creshipment_settings%2Ccomment_permission%2Cmark_infos%2Ccreated_time%2Cupdated_time%2Crelationship.is_authorized%2Cis_author%2Cvoting%2Cis_thanked%2Cis_nothelp%2Cupvoted_followees%3Bdata%5B%2A%5D.author.is_blocking%2Cis_blocked%2Cis_followed%2Cvoteup_count%2Cmessage_thread_token%2Cbadge%5B%3F%28type%3Dbest_answerer%29%5D.topics&limit=20&offset=20"
+  	},
+  	"data": [
+  		{
+  			"editable_content": "你不知道三年二班的同学多幸福。",
+  			"mark_infos": [],
+  			"excerpt": "你不知道三年二班的同学多幸福。",
+  			"thumbnail": "",
+  			"created_time": 1437959051,
+  			"id": 56584856,
+  			"voteup_count": 4229,
+  			"author": {
+  				"is_followed": false,
+  				"avatar_url_template": "https://pic2.zhimg.com/7c184a86aeb4a935fe73097e5e0522ad_{size}.jpg",
+  				"type": "people",
+  				"name": "子不语",
+  				"is_advertiser": false,
+  				"headline": "我的志愿是做一个校长，每天，收集了学生的学费后，就去吃火锅",
+  				"badge": [],
+  				"user_type": "people",
+  				"url": "http://www.zhihu.com/api/v4/people/ee60cd274ba5899f2087cfb8dc35e7f7",
+  				"avatar_url": "https://pic2.zhimg.com/7c184a86aeb4a935fe73097e5e0522ad_is.jpg",
+  				"is_following": false,
+  				"is_org": false,
+  				"gender": 1,
+  				"url_token": "zi-bu-yu-57-84",
+  				"id": "ee60cd274ba5899f2087cfb8dc35e7f7"
+  			},
+  			"question": {
+  				"author": {
+  					"is_followed": false,
+  					"avatar_url_template": "https://pic2.zhimg.com/aadd7b895_{size}.jpg",
+  					"type": "people",
+  					"name": "匿名用户",
+  					"is_advertiser": false,
+  					"headline": "",
+  					"badge": [],
+  					"user_type": "people",
+  					"url": "http://www.zhihu.com/api/v4/people/0",
+  					"avatar_url": "https://pic2.zhimg.com/aadd7b895_is.jpg",
+  					"is_following": false,
+  					"is_org": false,
+  					"gender": 1,
+  					"url_token": "",
+  					"id": "0"
+  				},
+  				"created": 1437531310,
+  				"url": "http://www.zhihu.com/api/v4/questions/33178973",
+  				"title": "周杰伦巅峰时期有多火？",
+  				"updated_time": 1460697436,
+  				"question_type": "normal",
+  				"type": "question",
+  				"id": 33178973
+  			},
+  			"content": "你不知道三年二班的同学多幸福。",
+  			"comment_count": 421,
+  			"reshipment_settings": "allowed",
+  			"is_copyable": true,
+  			"type": "answer",
+  			"suggest_edit": {
+  				"status": false,
+  				"title": "",
+  				"url": "",
+  				"tip": "",
+  				"reason": "",
+  				"unnormal_details": {}
+  			},
+  			"relationship": {
+  				"upvoted_followees": [],
+  				"voting": 0,
+  				"is_nothelp": false,
+  				"is_authorized": false,
+  				"is_author": false,
+  				"is_thanked": false
+  			},
+  			"collapsed_by": "nobody",
+  			"thanks_count": 357,
+  			"is_collapsed": false,
+  			"url": "http://www.zhihu.com/api/v4/answers/56584856",
+  			"comment_permission": "all",
+  			"is_sticky": null,
+  			"updated_time": 1437959051,
+  			"extras": "",
+  			"can_comment": {
+  				"status": true,
+  				"reason": ""
+  			},
+  			"is_normal": true
+  		}]
+  		}
