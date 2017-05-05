@@ -16,6 +16,7 @@ import com.webmargic.vo.CommentVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import us.codecraft.webmagic.Spider;
@@ -31,15 +32,19 @@ import java.util.concurrent.atomic.LongAdder;
 @Service("wangYiYunService")
 public class WangYiYunServiceImpl implements IWangYiYunService {
     Logger logger = LoggerFactory.getLogger(this.getClass());
+    @Qualifier("wyyUserMongoDBDao")
     @Autowired
     private WyyUserMapper userMapper;
 
+    @Qualifier("wyyMongoDBMusicDao")
     @Autowired
     private WyyMusicMapper musicMapper;
 
+    @Qualifier("wyyMongoDBHotCommentDao")
     @Autowired
     private WyyHotCommentMapper hotCommentMapper;
 
+    @Qualifier("wyyMongoDb")
     @Autowired
     private WyyCommentMapper commentMapper;
 
@@ -67,7 +72,11 @@ public class WangYiYunServiceImpl implements IWangYiYunService {
                 System.out.println("歌曲信息添加成功~" + musicInsert);
             }
         } catch (Exception e) {
-//            return;
+            if (e instanceof DuplicateKeyException) {
+                return;
+            } else {
+                logger.error("错误异常: " + e.getMessage() + "\t 错误参数:" + JSON.toJSONString(music));
+            }
         }
 
         if (vo.getHotComment() != null && vo.getHotComment().size() > 0) {
@@ -76,7 +85,11 @@ public class WangYiYunServiceImpl implements IWangYiYunService {
                 try {
                     int insert = hotCommentMapper.insert(hotComment);
                 } catch (Exception e) {
-//                    System.out.println("====");
+                    if (e instanceof DuplicateKeyException) {
+                        return;
+                    } else {
+                        logger.error("错误异常: " + e.getMessage() + "\t 错误参数:" + JSON.toJSONString(hotComment));
+                    }
                 }
             }
             count.add(vo.getHotComment().size());
@@ -107,7 +120,11 @@ public class WangYiYunServiceImpl implements IWangYiYunService {
                     int insert = userMapper.insert(wyyUser);
                     System.out.println("用户添加成功.");
                 } catch (Exception e) {
-//                    System.out.println("====");
+                    if (e instanceof DuplicateKeyException) {
+                        return;
+                    } else {
+                        logger.error("错误异常: " + e.getMessage() + "\t 错误参数:" + JSON.toJSONString(wyyUser));
+                    }
                 }
             }
             userCount.add(vo.getUser().size());

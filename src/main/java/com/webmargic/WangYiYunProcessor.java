@@ -39,15 +39,12 @@ import java.util.Map;
  **/
 public class WangYiYunProcessor implements PageProcessor {
 
-
     // 1. 周杰伦歌曲评论地址:http://music.163.com/artist?id=6452
-
-
     private IWangYiYunService wangYiYunService;
 
     private String url;
 
-    public WangYiYunProcessor(IWangYiYunService wangYiYunService,String url) {
+    public WangYiYunProcessor(IWangYiYunService wangYiYunService, String url) {
         this.wangYiYunService = wangYiYunService;
         this.url = url;
     }
@@ -83,12 +80,13 @@ public class WangYiYunProcessor implements PageProcessor {
             String musicName = page.getHtml().xpath("//*div/em[@class=f-ff2]/text()").get();
             JSONObject jsonObject = JSON.parseObject(crawlAjaxUrl(musicId, model));
             Integer total = jsonObject.getInteger("total");
-            Integer totalCount = total ;
+            Integer totalCount = total;
             for (int c = 0; c < 100 + 1; c++) {
                 model.setOffset(c * 100);
                 jsonObject = JSON.parseObject(crawlAjaxUrl(musicId, model));
                 JSONArray hotComments = jsonObject.getJSONArray("hotComments");
                 JSONArray comments = jsonObject.getJSONArray("comments");
+
                 CommentVO vo = new CommentVO();
                 List<WyyHotComment> hotCommentList = new ArrayList<WyyHotComment>();
                 List<WyyUser> userList = new ArrayList<WyyUser>();
@@ -96,13 +94,13 @@ public class WangYiYunProcessor implements PageProcessor {
 
 
                 // 热评
-                if(hotComments != null) {
+                if (hotComments != null) {
                     for (int i = 0; i < hotComments.size(); i++) {
                         JSONObject hotComments1 = hotComments.getJSONObject(i);
                         insertHotComment(hotComments1, musicId, url, hotCommentList, userList);
                     }
                 }
-                if(comments != null) {
+                if (comments != null) {
                     // 评论
                     for (int i = 0; i < comments.size(); i++) {
                         JSONObject commentsObject = comments.getJSONObject(i);
@@ -121,7 +119,7 @@ public class WangYiYunProcessor implements PageProcessor {
                 music.setTime(new Date());
                 music.setMusic_url(url);
                 music.setMusic_id(Integer.valueOf(musicId));
-                if(c == 0) {
+                if (c == 0) {
                     vo.setMusic(music);
                 }
                 wangYiYunService.insertMusic(vo);
@@ -132,6 +130,14 @@ public class WangYiYunProcessor implements PageProcessor {
         }
     }
 
+    /**
+     * 添加热评
+     * @param hotComments1
+     * @param musicId
+     * @param url
+     * @param hotCommentList
+     * @param userList
+     */
     private void insertHotComment(JSONObject hotComments1, String musicId, String url, List<WyyHotComment> hotCommentList, List<WyyUser> userList) {
         WyyHotComment hotComment = new WyyHotComment();
         // 评论
@@ -159,6 +165,14 @@ public class WangYiYunProcessor implements PageProcessor {
         insertUser(hotComments1, userList);
     }
 
+    /**
+     * 添加普通评论
+     * @param hotComments1
+     * @param musicId
+     * @param url
+     * @param commentList
+     * @param userList
+     */
     private void insertComment(JSONObject hotComments1, String musicId, String url, List<WyyComment> commentList, List<WyyUser> userList) {
         WyyComment hotComment = new WyyComment();
         // 评论
@@ -186,6 +200,11 @@ public class WangYiYunProcessor implements PageProcessor {
         insertUser(hotComments1, userList);
     }
 
+    /**
+     * 添加用户
+     * @param hotComments1
+     * @param userList
+     */
     private void insertUser(JSONObject hotComments1, List<WyyUser> userList) {
         WyyUser wyyUser = new WyyUser();
         // 用户信息
@@ -217,7 +236,6 @@ public class WangYiYunProcessor implements PageProcessor {
     /**
      * @return
      */
-
     public Site getSite() {
         if (site == null) {
             //http://music.163.com/discover/toplist  -- 排行榜
@@ -274,12 +292,12 @@ public class WangYiYunProcessor implements PageProcessor {
     public static void main(String[] args) {
 //        IWangYiYunService wangYiYunService = new WangYiYunServiceImpl();
 //        Spider.create(new WangYiYunProcessor()).thread(5).run();
-        int count = 66823 - 559 -1;
+        int count = 66823 - 559 - 1;
         RequestModel req = new RequestModel();
         req.setLimit(20);
-        req.setOffset(count*20);
+        req.setOffset(count * 20);
         req.setTotal(false);
-        String s = crawlAjaxUrl("186016",req);
+        String s = crawlAjaxUrl("418603077", req);
         JSONObject jsonObject = JSON.parseObject(s);
         System.out.println(s);
 

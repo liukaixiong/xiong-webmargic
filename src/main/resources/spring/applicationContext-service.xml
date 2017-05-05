@@ -10,19 +10,6 @@
 
 
 
-	<context:component-scan base-package="com.service"></context:component-scan>
+	<context:component-scan base-package="com.service,com.dao.mongodb,com.converter"></context:component-scan>
 	
-	<!--<bean id="ehcacheManager"-->
-		<!--class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean">-->
-		<!--<property name="configLocation" value="classpath:dtms-spring/ehcache.xml" />-->
-		<!--<property name="shared" value="true"></property>-->
-	<!--</bean>-->
-
-	<!--<bean id="ehCache" class="org.springframework.cache.ehcache.EhCacheFactoryBean">-->
-		<!--<property name="cacheManager" ref="ehcacheManager" />-->
-		<!--<property name="cacheName">-->
-			<!--<value>default-cache</value>-->
-		<!--</property>-->
-	<!--</bean>-->
-
 </beans>

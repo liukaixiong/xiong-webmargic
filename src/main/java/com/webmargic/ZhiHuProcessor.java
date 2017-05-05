@@ -31,6 +31,9 @@ public class ZhiHuProcessor implements PageProcessor {
 
     private Site site;
 
+    // 接口调用需要返回的认证token
+    private String authorization = "oauth c3cef7c66a1843f8b3a9e6a1e3160e20";
+
     private String contentMatch = "https://www.zhihu.com/question/\\d+";
 
     private String base_url = "zhihu.com";
@@ -80,7 +83,7 @@ public class ZhiHuProcessor implements PageProcessor {
      */
     public void sendHttpURLParent(String url, Page page) {
         Map header = new HashMap();
-        header.put("authorization", "oauth c3cef7c66a1843f8b3a9e6a1e3160e20");
+        header.put("authorization", authorization);
         String result = HttpClientUtil.doGetHeader(url, header);
         JSONObject resultObject = JSON.parseObject(result);
         JSONArray htmlsList = resultObject.getJSONArray("htmls");
@@ -145,7 +148,7 @@ public class ZhiHuProcessor implements PageProcessor {
     public void sendHttpURLSub(ZhRequestModel zhRequestModel, String url, int offset, int limit) {
         int size = 20;
         Map header = new HashMap();
-        header.put("authorization", "oauth c3cef7c66a1843f8b3a9e6a1e3160e20");
+        header.put("authorization", authorization);
         String urlText = url;
         urlText = urlText + "&offset=" + offset + "&limit=" + limit;
         String result = HttpClientUtil.doGetHeader(urlText, header);
@@ -176,7 +179,7 @@ public class ZhiHuProcessor implements PageProcessor {
     public void saveComments(ZhRequestModel zhRequestModel, Integer id, int offset) {
         int limit = 500;
         Map header = new HashMap();
-        header.put("authorization", "oauth c3cef7c66a1843f8b3a9e6a1e3160e20");
+        header.put("authorization",authorization);
         String urlText = "https://www.zhihu.com/api/v4/answers/" + id + "/comments?include=data%5B*%5D.author%2Ccollapsed%2Creply_to_author%2Cdisliked%2Ccontent%2Cvoting%2Cvote_count%2Cis_parent_author%2Cis_author&order=normal&limit=" + limit + "&status=open";
         urlText = urlText + "&offset=" + offset;
         String result = HttpClientUtil.doGetHeader(urlText, header);

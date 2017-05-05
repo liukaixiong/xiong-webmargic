@@ -1,46 +1,69 @@
 package com.model;
 
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
+
 import java.util.Date;
 
+/**
+ * @Description:热评表
+ * @Author: Liukx on 2017/5/5 - 14:42
+ */
+@Document(collection = "wyyHotComment")
 public class WyyHotComment {
-     // 
-     // 表字段 : wyy_hot_comment.id
+
+    @Id
+    private String mongoId;
+
+
+    // 表字段 : wyy_hot_comment.id
     private Integer id;
 
-     // 歌曲编号
-     // 表字段 : wyy_hot_comment.music_id
+    // 歌曲编号
+    // 表字段 : wyy_hot_comment.music_id
     private Integer music_id;
 
-     // 歌曲链接
-     // 表字段 : wyy_hot_comment.music_url
+    // 歌曲链接
+    // 表字段 : wyy_hot_comment.music_url
     private String music_url;
 
-     // 
-     // 表字段 : wyy_hot_comment.comment_id
+    //
+    // 表字段 : wyy_hot_comment.comment_id
+    @Indexed(unique = true)
     private Integer comment_id;
 
-     // 用户编号
-     // 表字段 : wyy_hot_comment.user_id
+    // 用户编号
+    // 表字段 : wyy_hot_comment.user_id
     private Integer user_id;
 
-     // 点赞总数
-     // 表字段 : wyy_hot_comment.like_count
+    // 点赞总数
+    // 表字段 : wyy_hot_comment.like_count
     private Integer like_count;
 
-     // 内容
-     // 表字段 : wyy_hot_comment.content
+    // 内容
+    // 表字段 : wyy_hot_comment.content
     private String content;
 
-     // 评论时间
-     // 表字段 : wyy_hot_comment.comment_time
+    // 评论时间
+    // 表字段 : wyy_hot_comment.comment_time
     private Date comment_time;
 
-     // 
-     // 表字段 : wyy_hot_comment.liked
+
+    //
+    // 表字段 : wyy_hot_comment.liked
     private String liked;
 
+    public String getMongoId() {
+        return mongoId;
+    }
+
+    public void setMongoId(String mongoId) {
+        this.mongoId = mongoId;
+    }
+
     /**
-     * 描述 ： 
+     * 描述 ：
      * 对应数据库： ->  wyy_hot_comment.id
      *
      * @mbg.generated
@@ -50,7 +73,7 @@ public class WyyHotComment {
     }
 
     /**
-     * 描述 ： 
+     * 描述 ：
      * 对应数据库： ->  wyy_hot_comment.id
      *
      * @mbg.generated
@@ -100,7 +123,7 @@ public class WyyHotComment {
     }
 
     /**
-     * 描述 ： 
+     * 描述 ：
      * 对应数据库： ->  wyy_hot_comment.comment_id
      *
      * @mbg.generated
@@ -110,7 +133,7 @@ public class WyyHotComment {
     }
 
     /**
-     * 描述 ： 
+     * 描述 ：
      * 对应数据库： ->  wyy_hot_comment.comment_id
      *
      * @mbg.generated
@@ -200,7 +223,7 @@ public class WyyHotComment {
     }
 
     /**
-     * 描述 ： 
+     * 描述 ：
      * 对应数据库： ->  wyy_hot_comment.liked
      *
      * @mbg.generated
@@ -210,7 +233,7 @@ public class WyyHotComment {
     }
 
     /**
-     * 描述 ： 
+     * 描述 ：
      * 对应数据库： ->  wyy_hot_comment.liked
      *
      * @mbg.generated

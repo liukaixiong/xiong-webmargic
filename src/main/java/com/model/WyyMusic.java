@@ -1,8 +1,16 @@
 package com.model;
 
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
+
 import java.util.Date;
 
+@Document(collection = "wyyMusic")
 public class WyyMusic {
+
+    @Id
+    private String mongoId;
      // 
      // 表字段 : wyy_music.id
     private Integer id;
@@ -29,6 +37,7 @@ public class WyyMusic {
 
      // 
      // 表字段 : wyy_music.music_id
+    @Indexed(unique = true)
     private Integer music_id;
 
      // 
@@ -43,6 +52,14 @@ public class WyyMusic {
      */
     public Integer getId() {
         return id;
+    }
+
+    public String getMongoId() {
+        return mongoId;
+    }
+
+    public void setMongoId(String mongoId) {
+        this.mongoId = mongoId;
     }
 
     /**

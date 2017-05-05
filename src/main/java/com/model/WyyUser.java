@@ -1,54 +1,70 @@
 package com.model;
 
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
+
 import java.util.Date;
 
+@Document(collection = "wyyUser")
 public class WyyUser {
-     // 
-     // 表字段 : wyy_user.id
+    @Id
+    private String mongoId;
+    //
+    // 表字段 : wyy_user.id
     private Integer id;
 
-     // 
-     // 表字段 : wyy_user.userid
+    //
+    // 表字段 : wyy_user.userid
+    @Indexed(unique = true)
     private Integer userid;
 
-     // 用户名称
-     // 表字段 : wyy_user.nike_name
+    // 用户名称
+    // 表字段 : wyy_user.nike_name
     private String nike_name;
 
-     // 用户主页
-     // 表字段 : wyy_user.user_url
+    // 用户主页
+    // 表字段 : wyy_user.user_url
     private String user_url;
 
-     // vip类型
-     // 表字段 : wyy_user.vip_type
+    // vip类型
+    // 表字段 : wyy_user.vip_type
     private Integer vip_type;
 
-     // 用户状态
-     // 表字段 : wyy_user.auth_status
+    // 用户状态
+    // 表字段 : wyy_user.auth_status
     private Integer auth_status;
 
-     // 名称描述
-     // 表字段 : wyy_user.remark_name
+    // 名称描述
+    // 表字段 : wyy_user.remark_name
     private String remark_name;
 
-     // 标签
-     // 表字段 : wyy_user.expert_tags
+    // 标签
+    // 表字段 : wyy_user.expert_tags
     private String expert_tags;
 
-     // 用户类型
-     // 表字段 : wyy_user.user_type
+    // 用户类型
+    // 表字段 : wyy_user.user_type
     private Integer user_type;
 
-     // 
-     // 表字段 : wyy_user.create_date
+    //
+    // 表字段 : wyy_user.create_date
     private Date create_date;
 
-     // 头像
-     // 表字段 : wyy_user.head_url
+    // 头像
+    // 表字段 : wyy_user.head_url
     private String head_url;
 
+    public String getMongoId() {
+        return mongoId;
+    }
+
+    public void setMongoId(String mongoId) {
+        this.mongoId = mongoId;
+    }
+
     /**
-     * 描述 ： 
+     * 描述 ：
      * 对应数据库： ->  wyy_user.id
      *
      * @mbg.generated
@@ -58,7 +74,7 @@ public class WyyUser {
     }
 
     /**
-     * 描述 ： 
+     * 描述 ：
      * 对应数据库： ->  wyy_user.id
      *
      * @mbg.generated
@@ -68,7 +84,7 @@ public class WyyUser {
     }
 
     /**
-     * 描述 ： 
+     * 描述 ：
      * 对应数据库： ->  wyy_user.userid
      *
      * @mbg.generated
@@ -78,7 +94,7 @@ public class WyyUser {
     }
 
     /**
-     * 描述 ： 
+     * 描述 ：
      * 对应数据库： ->  wyy_user.userid
      *
      * @mbg.generated
@@ -228,7 +244,7 @@ public class WyyUser {
     }
 
     /**
-     * 描述 ： 
+     * 描述 ：
      * 对应数据库： ->  wyy_user.create_date
      *
      * @mbg.generated
@@ -238,7 +254,7 @@ public class WyyUser {
     }
 
     /**
-     * 描述 ： 
+     * 描述 ：
      * 对应数据库： ->  wyy_user.create_date
      *
      * @mbg.generated

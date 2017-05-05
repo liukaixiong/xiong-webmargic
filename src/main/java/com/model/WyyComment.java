@@ -1,45 +1,63 @@
 package com.model;
 
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
+
 import java.util.Date;
 
 /**
  * 评论表
  */
+@Document(collection = "wyyComment")
 public class WyyComment {
+
+    @Id
+    private String mongoId;
     //
     // 表字段 : wyy_comment.id
     private Integer id;
 
     // 歌曲编号
     // 表字段 : wyy_comment.music_id
+    @Field
     private Integer music_id;
 
     // 歌曲链接
     // 表字段 : wyy_comment.music_url
+    @Field
     private String music_url;
 
     //
     // 表字段 : wyy_comment.comment_id
+    @Field
+    @Indexed(unique = true)
     private Integer comment_id;
 
     // 用户编号
     // 表字段 : wyy_comment.user_id
+    @Field
     private Integer user_id;
 
     // 点赞总数
     // 表字段 : wyy_comment.like_count
+    @Field
     private Integer like_count;
 
     // 内容
     // 表字段 : wyy_comment.content
+    @Field
     private String content;
 
     // 评论时间
     // 表字段 : wyy_comment.comment_time
+    @Field
     private Date comment_time;
 
     //
     // 表字段 : wyy_comment.liked
+    @Field
     private String liked;
 
     /**

@@ -1,7 +1,5 @@
 package com.webmargic.utils;
 
-import com.alibaba.fastjson.JSON;
-import com.webmargic.vo.RequestModel;
 import org.apache.commons.lang.RandomStringUtils;
 import sun.misc.BASE64Encoder;
 
@@ -96,12 +94,15 @@ public class WangYiYunEncryptUtils {
     }
 
     public static void main(String[] args) {
-        RequestModel requestModel = new RequestModel();
-        requestModel.setLimit(20);
-        requestModel.setOffset(1);
-        String text = JSON.toJSONString(requestModel);
-        Map<String, String> encrypt = WangYiYunEncryptUtils.encrypt(text);
-        System.out.println(encrypt.toString());
+//        RequestModel requestModel = new RequestModel();
+//        requestModel.setLimit(20);
+//        requestModel.setOffset(1);
+//        String text = JSON.toJSONString(requestModel);
+//        Map<String, String> encrypt = WangYiYunEncryptUtils.encrypt(text);
+//        System.out.println(encrypt.toString());
+        String username = "444368875%40qq.com";
+//        String encode = new BASE64Encoder().encode(username);
+//        System.out.println(encode);
     }
 
 }

@@ -15,5 +15,5 @@
 		</property>
 	</bean>
 	
-	<import resource="dtms-spring/applicationContext-*.xml"/>
+	<import resource="spring/applicationContext-*.xml"/>
 </beans>
