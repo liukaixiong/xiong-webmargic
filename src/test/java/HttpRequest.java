@@ -1,34 +1,75 @@
 
+import com.alibaba.fastjson.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 public class HttpRequest {
 
     public static void main(String[] args) {
-        // 如果不设置，只要代理IP和代理端口正确,此项不设置也可以
-        System.getProperties().setProperty("http.proxyHost", "10.22.40.32");
-        System.getProperties().setProperty("http.proxyPort", "8080");
-        // 判断代理是否设置成功
-        // 发送 GET 请求
-        System.out.println(sendGet(
-                "http://www.baidu.com",
-                "param1=xxx&param2=yyy"));
-        // 发送 POST 请求
+
+
+//        ProxyCralwerUnusedVPN vpn = new ProxyCralwerUnusedVPN();
+//
+//        String s = vpn.startCrawler(10);
+//
+//        JSONObject jsonObject = JSON.parseObject(s);
+//
+//        JSONObject data = jsonObject.getJSONObject("data");
+//        JSONArray proxy = data.getJSONArray("proxy");
+
+
+        List<JSONObject> proxy = new ArrayList<>();
+        proxy.add(getList("121.232.147.84","9000"));
+        proxy.add(getList("115.183.11.158","9999"));
+        proxy.add(getList("121.232.146.110","9000"));
+        proxy.add(getList("117.90.5.15","9000"));
+        proxy.add(getList("121.232.145.9","9000"));
+        proxy.add(getList("122.96.59.103","83"));
+        proxy.add(getList("121.232.145.90","9000"));
+        proxy.add(getList("183.47.65.170","8998"));
+        proxy.add(getList("113.72.113.231","8998"));
+        proxy.add(getList("60.178.130.236","8081"));
+
+        for (int i = 0; i < proxy.size(); i++) {
+            JSONObject object = proxy.get(i);
+            String ip = object.getString("ip");
+            String port = object.getString("port");
+            System.out.println("设置 ip : " + ip + "\t port : " + port);
+            // 如果不设置，只要代理IP和代理端口正确,此项不设置也可以
+            System.getProperties().setProperty("http.proxyHost", ip);
+            System.getProperties().setProperty("http.proxyPort", port);
+            // 判断代理是否设置成功
+            // 发送 GET 请求
+            System.out.println(sendGet(
+                    "http://www.toutiao.com/i6428397252825317889/",
+                    ""));
+            // 发送 POST 请求
+        }
+
+
+    }
+
+
+    private static JSONObject getList(String ip, String port) {
+        JSONObject json = new JSONObject();
+        json.put("ip", ip);
+        json.put("port", port);
+        return json;
     }
 
     /**
      * 向指定URL发送GET方法的请求
-     * 
-     * @param url
-     *            发送请求的URL
-     * @param param
-     *            请求参数，请求参数应该是 name1=value1&name2=value2 的形式。
+     *
+     * @param url   发送请求的URL
+     * @param param 请求参数，请求参数应该是 name1=value1&name2=value2 的形式。
      * @return URL 所代表远程资源的响应结果
      */
     public static String sendGet(String url, String param) {
@@ -78,11 +119,9 @@ public class HttpRequest {
 
     /**
      * 向指定 URL 发送POST方法的请求
-     * 
-     * @param url
-     *            发送请求的 URL
-     * @param param
-     *            请求参数，请求参数应该是 name1=value1&name2=value2 的形式。
+     *
+     * @param url   发送请求的 URL
+     * @param param 请求参数，请求参数应该是 name1=value1&name2=value2 的形式。
      * @return 所代表远程资源的响应结果
      */
     public static String sendPost(String url, String param) {

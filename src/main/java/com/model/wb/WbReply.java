@@ -31,6 +31,10 @@ public class WbReply {
      // 表字段 : wb_reply.reply_id
     private String replyId;
 
+     // 回复评论信息
+     // 表字段 : wb_reply.reply_text
+    private String replyText;
+
      // 
      // 表字段 : wb_reply.like_count
     private Integer likeCount;
@@ -185,6 +189,26 @@ public class WbReply {
      */
     public void setReplyId(String replyId) {
         this.replyId = replyId == null ? null : replyId.trim();
+    }
+
+    /**
+     * 描述 ： 回复评论信息
+     * 对应数据库： ->  wb_reply.reply_text
+     *
+     * @mbg.generated
+     */
+    public String getReplyText() {
+        return replyText;
+    }
+
+    /**
+     * 描述 ： 回复评论信息
+     * 对应数据库： ->  wb_reply.reply_text
+     *
+     * @mbg.generated
+     */
+    public void setReplyText(String replyText) {
+        this.replyText = replyText == null ? null : replyText.trim();
     }
 
     /**

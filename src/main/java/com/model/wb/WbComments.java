@@ -23,6 +23,10 @@ public class WbComments {
      // 表字段 : wb_comments.topic_id
     private String topicId;
 
+     // 话题内容
+     // 表字段 : wb_comments.topic_text
+    private String topicText;
+
      // 评论编号
      // 表字段 : wb_comments.comments_id
     private String commentsId;
@@ -145,6 +149,26 @@ public class WbComments {
      */
     public void setTopicId(String topicId) {
         this.topicId = topicId == null ? null : topicId.trim();
+    }
+
+    /**
+     * 描述 ： 话题内容
+     * 对应数据库： ->  wb_comments.topic_text
+     *
+     * @mbg.generated
+     */
+    public String getTopicText() {
+        return topicText;
+    }
+
+    /**
+     * 描述 ： 话题内容
+     * 对应数据库： ->  wb_comments.topic_text
+     *
+     * @mbg.generated
+     */
+    public void setTopicText(String topicText) {
+        this.topicText = topicText == null ? null : topicText.trim();
     }
 
     /**

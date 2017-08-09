@@ -1,8 +1,8 @@
 package com.service;
 
+import com.model.common.RequestTaskModel;
 import com.model.common.ResultDTO;
 import com.model.wb.WbInsertModel;
-import com.model.weibo.WeiBoCommentsModel;
 
 /**
  * 微博API请求
@@ -13,16 +13,21 @@ import com.model.weibo.WeiBoCommentsModel;
  **/
 public interface WeiBoService {
 
+
     /**
-     * 获取微博话题的所有评论
+     * 插入微博数据
      *
-     * @param commentsModel
+     * @param model
+     * @throws Exception
+     */
+    public void insertData(WbInsertModel model) throws Exception;
+
+    /**
+     * 爬虫爬取对象
+     *
+     * @param requestModel
      * @return
      */
-    public ResultDTO getPageAllCommentList(WeiBoCommentsModel commentsModel);
-
-    public ResultDTO getSingeCommentsList(String url) throws Exception;
-
-    public void insertData(WbInsertModel model) throws Exception;
+    public ResultDTO crawler(RequestTaskModel requestModel) throws Exception;
 
 }

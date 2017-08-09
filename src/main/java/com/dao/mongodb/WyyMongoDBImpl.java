@@ -6,7 +6,6 @@ import com.model.WyyCommentExample;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
@@ -17,7 +16,7 @@ import java.util.List;
  * @create 2017-05-02 16:47
  * @email liukx@elab-plus.com
  **/
-@Repository("wyyMongoDb")
+//@Repository("wyyMongoDb")
 public class WyyMongoDBImpl implements WyyCommentMapper {
 
     @Autowired

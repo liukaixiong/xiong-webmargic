@@ -23,8 +23,8 @@ public class WangYiYunController {
     @RequestMapping(value = "/wyy", method = RequestMethod.GET, produces = "application/json;charset=UTF-8")
     @ResponseBody
     public ResultDTO insertEvaluate(String url) {
-        ResultDTO resultDTO = wangYiYunService.wyyCrawler(url);
-        return resultDTO;
+//        ResultDTO resultDTO = wangYiYunService.wyyCrawler(url);
+        return null;
     }
 
 

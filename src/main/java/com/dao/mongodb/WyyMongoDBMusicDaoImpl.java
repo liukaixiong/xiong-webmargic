@@ -6,11 +6,10 @@ import com.model.WyyMusicExample;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-@Repository("wyyMongoDBMusicDao")
+//@Repository("wyyMongoDBMusicDao")
 public class WyyMongoDBMusicDaoImpl implements WyyMusicMapper {
     @Autowired
     private MongoTemplate mongoTemplate;

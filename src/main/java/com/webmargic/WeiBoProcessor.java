@@ -1,12 +1,15 @@
 package com.webmargic;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.model.common.RequestTaskModel;
 import com.model.wb.WbComments;
 import com.model.wb.WbInsertModel;
 import com.model.wb.WbReply;
 import com.model.wb.WbTopic;
 import com.service.WeiBoService;
+import com.webmargic.utils.CommentUtils;
 import com.webmargic.utils.HttpClientUtil;
 import com.webmargic.utils.WeiBoUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
@@ -17,10 +20,7 @@ import us.codecraft.webmagic.processor.PageProcessor;
 import us.codecraft.webmagic.selector.Html;
 import us.codecraft.webmagic.selector.Selectable;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -40,9 +40,10 @@ public class WeiBoProcessor implements PageProcessor {
     private String cookie;
     // TODO 必填
     //微博帐号
-    private String username = "";
+    private String username = "444368875@qq.com";
     // 微博密码
-    private String password = "";
+    private String password = "lkx3551211";
+
 
     private String contentMatch = "http://weibo.com/p/aj/v6/mblog/mbloglist";
 
@@ -52,7 +53,14 @@ public class WeiBoProcessor implements PageProcessor {
 
     private String commentsMatch = "http://weibo.com/\\d+/[A-Za-z0-9]+\\?[A-Za-z0-9=_&]+";
 
+    //微博手机端评论地址
+    private String mobileCommentUrl = "https://m.weibo.cn/api/comments/show";
+
+    private String mobileUrl = "https://m.weibo.cn/status";
+
     private String base_url = "weibo.com";
+
+    private String search_url = "http://s.weibo.com/weibo";
 
     private AtomicInteger count = new AtomicInteger();
 
@@ -61,10 +69,12 @@ public class WeiBoProcessor implements PageProcessor {
 
     private WeiBoService weiBoService;
 
-    public WeiBoProcessor(WeiBoService weiBoService, String url) throws Exception {
-        this.BASE_Node_URL = url;
-        this.weiBoService = weiBoService;
+    private String keyword;
 
+    public WeiBoProcessor(WeiBoService weiBoService, RequestTaskModel requestTaskModel) throws Exception {
+        this.BASE_Node_URL = requestTaskModel.getUrl();
+        this.keyword = requestTaskModel.getKeyword();
+        this.weiBoService = weiBoService;
         this.cookie = WeiBoUtils.login(username, password);
     }
 
@@ -79,13 +89,22 @@ public class WeiBoProcessor implements PageProcessor {
         if (page.getUrl().toString().startsWith(contentMatch)) {
 
         }
+        // 手机端评论请求
+        else if (page.getUrl().toString().startsWith(mobileUrl)) {
+            WbInsertModel wbInsertModel = new WbInsertModel();
+            parseMobileHtml(page, wbInsertModel);
+        }
         // 如果是评论或者回复的情况下
         else if (page.getUrl().toString().startsWith(comentsUrl)) {
 
         }
+        //如果是大厅搜索关键字查询的结果
+        else if (page.getUrl().toString().startsWith(search_url)) {
+            //todo 感觉抓取到的评论不是特别想要的.暂时不去做实现
+            resolveKeywordSubject(page, new WbInsertModel());
+        }
         // 用户信息
         else if (page.getUrl().regex(userDetails).match()) {
-            System.out.println("----------------------");
             String script = page.getHtml().xpath("/html/body/script[14]").get();
             String json = script.substring(script.indexOf("{"), script.lastIndexOf("}") + 1);
             JSONObject jsonObject = JSON.parseObject(json);
@@ -102,10 +121,135 @@ public class WeiBoProcessor implements PageProcessor {
         } else {
             // 微博博主列表信息
             String url = page.getUrl().toString();
-            System.out.println("url - > " + url);
+//            System.out.println("url - > " + url);
             WbInsertModel model = new WbInsertModel();
             resolveUserInfo(page, model);
         }
+    }
+
+    /**
+     * 抓取手机端传递过来的页面
+     * @param page
+     * @param model
+     */
+    private void parseMobileHtml(Page page, WbInsertModel model) {
+        String renderDataStr = scripteResolveJSON(page, "$render_data");
+        String rederData = renderDataStr.substring(renderDataStr.indexOf("[{"), renderDataStr.lastIndexOf("}]") + 2);
+        String data = CommentUtils.Html2Text(rederData);
+        JSONArray objects = JSON.parseArray(data);
+        JSONObject status = objects.getJSONObject(0).getJSONObject("status");
+        String text = status.getString("text");
+        String id = status.getString("id");
+        Integer likeCount = status.getInteger("attitudes_count");
+        Integer reportsCount = status.getInteger("reposts_count");
+        Integer commentsCount = status.getInteger("comments_count");
+        JSONObject user = status.getJSONObject("user");
+        String userId = user.getString("id");
+        String username = user.getString("screen_name");
+        String homePage = user.getString("profile_url");
+        WbTopic topic = new WbTopic();
+        topic.setCommentsCount(commentsCount);
+        topic.setContent(text);
+        topic.setForwardCount(reportsCount);
+        topic.setLikeCount(likeCount);
+        topic.setSystemTime(new Date());
+        topic.setTopicId(id);
+        topic.setUsername(username);
+        topic.setUserNo(userId);
+        topic.setHomePage(homePage);
+        model.setWbTopic(topic);
+        String url = mobileCommentUrl + "?id=" + id;
+        Long start = System.currentTimeMillis();
+        mobileCommentList(model, id, text, url, 0);
+        System.out.println("一共抓去耗时:" + (System.currentTimeMillis() - start));
+    }
+
+    private void mobileCommentList(WbInsertModel model, String topicId, String title, String url, int page) {
+        StringBuffer sb = new StringBuffer(url);
+        sb.append("&page=" + page);
+        System.out.println("请求参数:" + sb.toString());
+        String resultData = HttpClientUtil.doGet(sb.toString());
+        JSONObject resultJson = JSON.parseObject(resultData);
+        JSONArray dataList = resultJson.getJSONArray("data");
+        if (dataList == null || dataList.size() == 0) {
+            System.out.println("★★★★★★★★★★★★★★★★★★" + resultJson.toJSONString());
+            // 防止请求太快,返回不了正确的结果集!
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            mobileCommentList(new WbInsertModel(), topicId, title, url, page);
+            return;
+        }
+        int max = resultJson.getInteger("max");
+        int count = resultJson.getInteger("total_number");
+        List<WbReply> replyList = model.getReplyList();
+        List<WbComments> commentsList = model.getCommentsList();
+
+        for (int i = 0; i < dataList.size(); i++) {
+            JSONObject jsonObject = dataList.getJSONObject(i);
+
+            String text = jsonObject.getString("text");
+
+            // 默认高质量评论 字数必须大于10
+            if (!CommentUtils.commentFilter(text)) {
+                continue;
+            }
+            String id = jsonObject.getString("id");
+            Integer like_counts = jsonObject.getInteger("like_counts");
+            String created_at = jsonObject.getString("created_at");
+
+            JSONObject user = jsonObject.getJSONObject("user");
+            String username = user.getString("screen_name");
+            String userId = user.getString("id");
+            String profile_url = user.getString("profile_url");
+            if (text.startsWith("回复") || text.startsWith("回復") || text.startsWith("回覆")) {
+                String reply_id = jsonObject.getString("reply_id");
+                String reply_text = jsonObject.getString("reply_text");
+                //回復内容
+                WbReply reply = new WbReply();
+                reply.setCommentsId(id);
+                reply.setContent(text);
+                reply.setCreated(created_at);
+                reply.setHomePage(profile_url);
+                reply.setTopicId(topicId);
+                reply.setLikeCount(like_counts);
+                reply.setUserId(userId);
+                reply.setUsername(username);
+                reply.setSystemTime(new Date());
+                reply.setReplyId(reply_id);
+                reply.setReplyText(reply_text);
+                replyList.add(reply);
+            } else {
+                //评论内容
+                WbComments comments = new WbComments();
+                comments.setCommentsId(id);
+                comments.setContent(CommentUtils.Html2Text(text));
+                comments.setLikeCount(like_counts);
+                comments.setCreated(created_at);
+                comments.setUsername(username);
+                comments.setUserNo(userId);
+                comments.setSystemTime(new Date());
+                comments.setHomePage(profile_url);
+                comments.setTopicId(topicId);
+                comments.setTopicText(title);
+                commentsList.add(comments);
+            }
+            //System.out.println("第 [" + ((page * 10) + i) + "] --- 评论 : " + text);
+        }
+
+        try {
+            weiBoService.insertData(model);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        if (page < max) {
+            int nextPage = page + 1;
+            mobileCommentList(new WbInsertModel(), topicId, title, url, nextPage);
+        }
+
     }
 
     /**
@@ -196,6 +340,77 @@ public class WeiBoProcessor implements PageProcessor {
         System.out.println("resultJson - " + resultJson.toJSONString());
     }
 
+
+    private Html scripteResolveHtml(Page page, String indexOf) {
+        List<String> scriptList = page.getHtml().xpath("/html/body/script").all();
+        String script = "";
+        for (int i = 0; i < scriptList.size(); i++) {
+            String html = scriptList.get(i);
+            if (html.indexOf(indexOf) > 0) {
+                script = html;
+                break;
+            }
+        }
+        String htmls = script.substring(script.indexOf("<div"), script.lastIndexOf("div>") + 4);
+        Html html = new Html(StringEscapeUtils.unescapeEcmaScript(htmls));
+        return html;
+    }
+
+
+    private String scripteResolveJSON(Page page, String indexOf) {
+        List<String> scriptList = page.getHtml().xpath("/html/body/script").all();
+        String script = "";
+        for (int i = 0; i < scriptList.size(); i++) {
+            String html = scriptList.get(i);
+            if (html.indexOf(indexOf) > 0) {
+                script = html;
+                break;
+            }
+        }
+        return script;
+    }
+
+    private void resolveKeywordSubject(Page page, WbInsertModel model) {
+//        WbTopic wbTopic = model.getWbTopic();
+//        // 话题 scripte 标识
+//        String indexOf = "feed_lists W_texta";
+//        // 评论
+//        Html html = scripteReslveHtml(page, indexOf);
+//        // 内容
+//        List<String> contentList = html.xpath("/html/body/div/div/div/div/div/div/dl/div/div/div/p/html()").all();
+//        // 内容编号
+//        String contentId = html.$("body > div > div > div > div.WB_feed_detail.clearfix > div.WB_detail > div.WB_from.S_txt2 > a:nth-child(1)", "name").get();
+//
+//        // 创建时间
+//        String created = html.$("body > div > div > div > div.WB_feed_detail.clearfix > div.WB_detail > div.WB_from.S_txt2 > a:nth-child(1)", "title").get();
+//        // 用户主页
+//        String url = html.$("body > div > div > div > div.WB_feed_detail.clearfix > div.WB_detail > div.WB_from.S_txt2 > a:nth-child(1)", "href").get();
+//        // 用户昵称
+//        String username = html.xpath("/html/body/div/div/div/div/div/div[1]/a/text()").regex("\\S+").get();
+//        // 转发
+//        String forwardCount = html.xpath("/html/body/div/div/div/div[2]/div/ul/li[2]/a/span/span/span/em[2]/text()").get();
+//        // 评论
+//        String commentCount = html.xpath("/html/body/div/div/div/div[2]/div/ul/li[3]/a/span/span/span/em[2]/text()").get();
+//        // 点赞
+//        String likeCount = html.xpath("/html/body/div/div/div/div[2]/div/ul/li[4]/a/span/span/span/em[2]/text()").get();
+//        // 用户编号
+//        String userId = url.substring(url.indexOf("com/") + 4, url.lastIndexOf("/"));
+//
+//        wbTopic.setContent(content);
+//        wbTopic.setTopicId(contentId);
+//        wbTopic.setCreated(created);
+//        // 昵称
+//        wbTopic.setCommentsCount(Integer.valueOf(commentCount));
+//        wbTopic.setForwardCount(formatForwardCount(forwardCount));
+//        wbTopic.setLikeCount(likeConverZero(likeCount));
+//        wbTopic.setUserNo(userId);
+//        wbTopic.setSystemTime(new Date());
+//        wbTopic.setHomePage("http://weibo.com/" + userId);
+//        wbTopic.setUsername(username);
+//        System.out.println("话题 ----> " + content);
+//        resolveComments(contentId, 1, model);
+    }
+
     /**
      * 获取单个话题信息
      *
@@ -203,18 +418,10 @@ public class WeiBoProcessor implements PageProcessor {
      */
     private void resolveSingleSubject(Page page, WbInsertModel model) {
         WbTopic wbTopic = model.getWbTopic();
+        // 话题 scripte 标识
+        String indexOf = "pl.content.weiboDetail.index";
         // 评论
-        List<String> scriptList = page.getHtml().xpath("/html/body/script").all();
-        String script = "";
-        for (int i = 0; i < scriptList.size(); i++) {
-            String html = scriptList.get(i);
-            if (html.indexOf("pl.content.weiboDetail.index") > 0) {
-                script = html;
-                break;
-            }
-        }
-        String htmls = script.substring(script.indexOf("<div"), script.lastIndexOf("div>") + 4);
-        Html html = new Html(StringEscapeUtils.unescapeEcmaScript(htmls));
+        Html html = scripteResolveHtml(page, indexOf);
         // 内容
         String content = html.xpath("/html/body/div/div/div/div/div/div[3]/html()").get();
         // 内容编号
@@ -322,7 +529,7 @@ public class WeiBoProcessor implements PageProcessor {
                 comments.setHomePage("http://weibo.com/" + userid);
                 comments.setTopicId(id);
                 comments.setUsername(name);
-                System.out.println("内容:" + content + " \t 点赞:" + likeCount);
+                //System.out.println("内容:" + content + " \t 点赞:" + likeCount);
                 //////////////////////////////评论详情资料///////////////////////////////////
                 ////////////////////////////获取回复详情///////////////////////////////////
                 StringBuffer reply = new StringBuffer("http://weibo.com/aj/v6/comment/big?is_child_comment=ture&from=singleWeiBo");

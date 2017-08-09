@@ -7,6 +7,7 @@
     <result column="username" jdbcType="VARCHAR" property="username" />
     <result column="home_page" jdbcType="VARCHAR" property="homePage" />
     <result column="topic_id" jdbcType="VARCHAR" property="topicId" />
+    <result column="topic_text" jdbcType="VARCHAR" property="topicText" />
     <result column="comments_id" jdbcType="VARCHAR" property="commentsId" />
     <result column="comments_count" jdbcType="INTEGER" property="commentsCount" />
     <result column="like_count" jdbcType="INTEGER" property="likeCount" />
@@ -75,8 +76,8 @@
     </where>
   </sql>
   <sql id="Base_Column_List">
-    id, user_no, username, home_page, topic_id, comments_id, comments_count, like_count, 
-    created, system_time
+    id, user_no, username, home_page, topic_id, topic_text, comments_id, comments_count, 
+    like_count, created, system_time
   </sql>
   <sql id="Blob_Column_List">
     content
@@ -134,13 +135,13 @@
       SELECT LAST_INSERT_ID()
     </selectKey>
     insert into wb_comments (user_no, username, home_page, 
-      topic_id, comments_id, comments_count, 
-      like_count, created, system_time, 
-      content)
+      topic_id, topic_text, comments_id, 
+      comments_count, like_count, created, 
+      system_time, content)
     values (#{userNo,jdbcType=VARCHAR}, #{username,jdbcType=VARCHAR}, #{homePage,jdbcType=VARCHAR}, 
-      #{topicId,jdbcType=VARCHAR}, #{commentsId,jdbcType=VARCHAR}, #{commentsCount,jdbcType=INTEGER}, 
-      #{likeCount,jdbcType=INTEGER}, #{created,jdbcType=VARCHAR}, #{systemTime,jdbcType=TIMESTAMP}, 
-      #{content,jdbcType=LONGVARCHAR})
+      #{topicId,jdbcType=VARCHAR}, #{topicText,jdbcType=VARCHAR}, #{commentsId,jdbcType=VARCHAR}, 
+      #{commentsCount,jdbcType=INTEGER}, #{likeCount,jdbcType=INTEGER}, #{created,jdbcType=VARCHAR}, 
+      #{systemTime,jdbcType=TIMESTAMP}, #{content,jdbcType=LONGVARCHAR})
   </insert>
   <insert id="insertSelective" parameterType="com.model.wb.WbComments">
     <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
@@ -159,6 +160,9 @@
       </if>
       <if test="topicId != null">
         topic_id,
+      </if>
+      <if test="topicText != null">
+        topic_text,
       </if>
       <if test="commentsId != null">
         comments_id,
@@ -191,6 +195,9 @@
       </if>
       <if test="topicId != null">
         #{topicId,jdbcType=VARCHAR},
+      </if>
+      <if test="topicText != null">
+        #{topicText,jdbcType=VARCHAR},
       </if>
       <if test="commentsId != null">
         #{commentsId,jdbcType=VARCHAR},
@@ -236,6 +243,9 @@
       <if test="record.topicId != null">
         topic_id = #{record.topicId,jdbcType=VARCHAR},
       </if>
+      <if test="record.topicText != null">
+        topic_text = #{record.topicText,jdbcType=VARCHAR},
+      </if>
       <if test="record.commentsId != null">
         comments_id = #{record.commentsId,jdbcType=VARCHAR},
       </if>
@@ -266,6 +276,7 @@
       username = #{record.username,jdbcType=VARCHAR},
       home_page = #{record.homePage,jdbcType=VARCHAR},
       topic_id = #{record.topicId,jdbcType=VARCHAR},
+      topic_text = #{record.topicText,jdbcType=VARCHAR},
       comments_id = #{record.commentsId,jdbcType=VARCHAR},
       comments_count = #{record.commentsCount,jdbcType=INTEGER},
       like_count = #{record.likeCount,jdbcType=INTEGER},
@@ -283,6 +294,7 @@
       username = #{record.username,jdbcType=VARCHAR},
       home_page = #{record.homePage,jdbcType=VARCHAR},
       topic_id = #{record.topicId,jdbcType=VARCHAR},
+      topic_text = #{record.topicText,jdbcType=VARCHAR},
       comments_id = #{record.commentsId,jdbcType=VARCHAR},
       comments_count = #{record.commentsCount,jdbcType=INTEGER},
       like_count = #{record.likeCount,jdbcType=INTEGER},
@@ -306,6 +318,9 @@
       </if>
       <if test="topicId != null">
         topic_id = #{topicId,jdbcType=VARCHAR},
+      </if>
+      <if test="topicText != null">
+        topic_text = #{topicText,jdbcType=VARCHAR},
       </if>
       <if test="commentsId != null">
         comments_id = #{commentsId,jdbcType=VARCHAR},
@@ -334,6 +349,7 @@
       username = #{username,jdbcType=VARCHAR},
       home_page = #{homePage,jdbcType=VARCHAR},
       topic_id = #{topicId,jdbcType=VARCHAR},
+      topic_text = #{topicText,jdbcType=VARCHAR},
       comments_id = #{commentsId,jdbcType=VARCHAR},
       comments_count = #{commentsCount,jdbcType=INTEGER},
       like_count = #{likeCount,jdbcType=INTEGER},
@@ -348,6 +364,7 @@
       username = #{username,jdbcType=VARCHAR},
       home_page = #{homePage,jdbcType=VARCHAR},
       topic_id = #{topicId,jdbcType=VARCHAR},
+      topic_text = #{topicText,jdbcType=VARCHAR},
       comments_id = #{commentsId,jdbcType=VARCHAR},
       comments_count = #{commentsCount,jdbcType=INTEGER},
       like_count = #{likeCount,jdbcType=INTEGER},

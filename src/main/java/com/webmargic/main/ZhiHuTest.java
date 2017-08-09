@@ -1,5 +1,6 @@
 package com.webmargic.main;
 
+import com.model.common.RequestTaskModel;
 import com.service.ZhiHuService;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -18,6 +19,9 @@ public class ZhiHuTest {
         String[] xml = new String[]{"classpath:root-context.xml"};
         ApplicationContext applicationContext = new ClassPathXmlApplicationContext(xml);
         ZhiHuService zhiHuService = (ZhiHuService) applicationContext.getBean("zhiHuService");
-        zhiHuService.zhCrawler("周杰伦");
+        RequestTaskModel requestTaskModel = new RequestTaskModel();
+        requestTaskModel.setUrl("https://www.zhihu.com/question/27660727?utm_source=com.netease.mobimail&utm_medium=social");
+        zhiHuService.crawler(requestTaskModel);
+//        zhiHuService.zhCrawler("周杰伦");
     }
 }

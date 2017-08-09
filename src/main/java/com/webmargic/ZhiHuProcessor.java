@@ -3,10 +3,14 @@ package com.webmargic;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.model.common.RequestTaskModel;
 import com.model.zh.*;
 import com.service.ZhiHuService;
+import com.webmargic.utils.CommentUtils;
 import com.webmargic.utils.HttpClientUtil;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import us.codecraft.webmagic.Page;
 import us.codecraft.webmagic.Site;
 import us.codecraft.webmagic.processor.PageProcessor;
@@ -28,6 +32,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  **/
 public class ZhiHuProcessor implements PageProcessor {
 
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private Site site;
 
@@ -41,14 +46,17 @@ public class ZhiHuProcessor implements PageProcessor {
     private AtomicInteger count = new AtomicInteger();
 
     //主域名
-    public static final String BASE_Node_URL = "https://www.zhihu.com";
+    public String BASE_Node_URL = "https://www.zhihu.com";
 
-    private String search;
+    private String keyword;
 
     private ZhiHuService zhiHuService;
 
-    public ZhiHuProcessor(ZhiHuService zhiHuService, String search) {
-        this.search = search;
+    public ZhiHuProcessor(ZhiHuService zhiHuService, RequestTaskModel search) {
+        this.keyword = search.getKeyword();
+        if (StringUtils.isNotBlank(search.getUrl())) {
+            this.BASE_Node_URL = search.getUrl();
+        }
         this.zhiHuService = zhiHuService;
     }
 
@@ -62,16 +70,19 @@ public class ZhiHuProcessor implements PageProcessor {
             // 知乎单个提问详情
             String url = page.getUrl().get();
             String id = url.substring(url.lastIndexOf("/") + 1, url.length());
+            if (id.indexOf("?") > 0) {
+                id = id.substring(0, id.indexOf("?"));
+            }
             System.out.println("抓取地址 -> " + url);
             // ajax 获取对应的答题参数
             ZhRequestModel requestModel = new ZhRequestModel();
             sendHttpURLSub(requestModel, "https://www.zhihu.com/api/v4/questions/" + id + "/answers?include=data%5B*%5D.is_normal%2Cis_sticky%2Ccollapsed_by%2Csuggest_edit%2Ccomment_count%2Ccan_comment%2Ccontent%2Ceditable_content%2Cvoteup_count%2Creshipment_settings%2Ccomment_permission%2Cmark_infos%2Ccreated_time%2Cupdated_time%2Crelationship.is_authorized%2Cis_author%2Cvoting%2Cis_thanked%2Cis_nothelp%2Cupvoted_followees%3Bdata%5B*%5D.author.is_blocking%2Cis_blocked%2Cis_followed%2Cvoteup_count%2Cmessage_thread_token%2Cbadge%5B%3F(type%3Dbest_answerer)%5D.topics&sort_by=default", 0, 20);
             // 问题本身详情
-            getQuestionsInfo(requestModel, page);
+            getQuestionsInfo(requestModel, page, id);
             zhiHuService.insertData(requestModel);
         } else {
             // 知乎大厅
-            sendHttpURLParent("https://www.zhihu.com/r/search?q=" + search + "&sort=upvote&type=content", page);
+            sendHttpURLParent("https://www.zhihu.com/r/search?q=" + keyword + "&sort=upvote&type=content", page);
         }
     }
 
@@ -107,11 +118,11 @@ public class ZhiHuProcessor implements PageProcessor {
      *
      * @param page 页面内容
      */
-    private void getQuestionsInfo(ZhRequestModel requestModel, Page page) {
+    private void getQuestionsInfo(ZhRequestModel requestModel, Page page, String id) {
         ZhQuestion question = requestModel.getQuestion();
         // 同时抓去问题的相关内容
         String url = page.getUrl().get();
-        String id = url.substring(url.lastIndexOf("/") + 1, url.length());
+//        String id = url.substring(url.lastIndexOf("/") + 1, url.length());
 
         //关注者
         String guanzhuzhe = page.getHtml().xpath("//*[@id=\"root\"]/div/main/div/div[1]/div[2]/").xpath("div[1]").xpath("/div/div/div/div/div[2]/text()").get();
@@ -151,6 +162,7 @@ public class ZhiHuProcessor implements PageProcessor {
         header.put("authorization", authorization);
         String urlText = url;
         urlText = urlText + "&offset=" + offset + "&limit=" + limit;
+        logger.info(" 知乎 发送查询回答详情内容 地址:" + urlText);
         String result = HttpClientUtil.doGetHeader(urlText, header);
         JSONObject resultObject = JSON.parseObject(result);
         JSONObject paging = resultObject.getJSONObject("paging");
@@ -163,9 +175,7 @@ public class ZhiHuProcessor implements PageProcessor {
         }
         Integer totals = paging.getInteger("totals");
         if (totals > offset) {
-//            for (int i = offset; i < totals; i++) {
             sendHttpURLSub(zhRequestModel, url, offset + size, size);
-//            }
         }
     }
 
@@ -179,7 +189,7 @@ public class ZhiHuProcessor implements PageProcessor {
     public void saveComments(ZhRequestModel zhRequestModel, Integer id, int offset) {
         int limit = 500;
         Map header = new HashMap();
-        header.put("authorization",authorization);
+        header.put("authorization", authorization);
         String urlText = "https://www.zhihu.com/api/v4/answers/" + id + "/comments?include=data%5B*%5D.author%2Ccollapsed%2Creply_to_author%2Cdisliked%2Ccontent%2Cvoting%2Cvote_count%2Cis_parent_author%2Cis_author&order=normal&limit=" + limit + "&status=open";
         urlText = urlText + "&offset=" + offset;
         String result = HttpClientUtil.doGetHeader(urlText, header);
@@ -258,6 +268,10 @@ public class ZhiHuProcessor implements PageProcessor {
         Integer comment_id = jsonObject.getInteger("id");
         // 正文内容
         String content = jsonObject.getString("content");
+        if (!CommentUtils.commentFilter(content)) {
+            return;
+        }
+
         // 点赞
         Integer vote_count = jsonObject.getInteger("vote_count");
         // 创建时间
@@ -283,7 +297,7 @@ public class ZhiHuProcessor implements PageProcessor {
         ////////////////////////////答题详情//////////////////////////////
         Integer id = dataObject.getInteger("id");
         // 正文内容
-        String editable_content = dataObject.getString("editable_content");
+        String editable_content = dataObject.getString("content");
         //摘录
         String excerpt = dataObject.getString("excerpt");
         // 点赞数

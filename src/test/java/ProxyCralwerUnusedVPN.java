@@ -34,11 +34,11 @@ public class ProxyCralwerUnusedVPN {
         localWantedNumber.set(wantedNumber);
 
         kuaidailiCom("http://www.xicidaili.com/nn/", 15);
-        kuaidailiCom("http://www.xicidaili.com/nt/", 15);
-        kuaidailiCom("http://www.xicidaili.com/wt/", 15);
-        kuaidailiCom("http://www.kuaidaili.com/free/inha/", 15);
-        kuaidailiCom("http://www.kuaidaili.com/free/intr/", 15);
-        kuaidailiCom("http://www.kuaidaili.com/free/outtr/", 15);
+//        kuaidailiCom("http://www.xicidaili.com/nt/", 15);
+//        kuaidailiCom("http://www.xicidaili.com/wt/", 15);
+//        kuaidailiCom("http://www.kuaidaili.com/free/inha/", 15);
+//        kuaidailiCom("http://www.kuaidaili.com/free/intr/", 15);
+//        kuaidailiCom("http://www.kuaidaili.com/free/outtr/", 15);
 
         /**
          * 构造返回数据

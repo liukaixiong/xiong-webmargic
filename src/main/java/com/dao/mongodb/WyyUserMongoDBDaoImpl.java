@@ -6,11 +6,10 @@ import com.model.WyyUserExample;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-@Repository("wyyUserMongoDBDao")
+//@Repository("wyyUserMongoDBDao")
 public class WyyUserMongoDBDaoImpl implements WyyUserMapper {
     @Autowired
     private MongoTemplate mongoTemplate;

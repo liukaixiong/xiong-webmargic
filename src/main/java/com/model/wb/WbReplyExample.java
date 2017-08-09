@@ -585,6 +585,76 @@ public class WbReplyExample {
             return (Criteria) this;
         }
 
+        public Criteria andReplyTextIsNull() {
+            addCriterion("reply_text is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andReplyTextIsNotNull() {
+            addCriterion("reply_text is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andReplyTextEqualTo(String value) {
+            addCriterion("reply_text =", value, "replyText");
+            return (Criteria) this;
+        }
+
+        public Criteria andReplyTextNotEqualTo(String value) {
+            addCriterion("reply_text <>", value, "replyText");
+            return (Criteria) this;
+        }
+
+        public Criteria andReplyTextGreaterThan(String value) {
+            addCriterion("reply_text >", value, "replyText");
+            return (Criteria) this;
+        }
+
+        public Criteria andReplyTextGreaterThanOrEqualTo(String value) {
+            addCriterion("reply_text >=", value, "replyText");
+            return (Criteria) this;
+        }
+
+        public Criteria andReplyTextLessThan(String value) {
+            addCriterion("reply_text <", value, "replyText");
+            return (Criteria) this;
+        }
+
+        public Criteria andReplyTextLessThanOrEqualTo(String value) {
+            addCriterion("reply_text <=", value, "replyText");
+            return (Criteria) this;
+        }
+
+        public Criteria andReplyTextLike(String value) {
+            addCriterion("reply_text like", value, "replyText");
+            return (Criteria) this;
+        }
+
+        public Criteria andReplyTextNotLike(String value) {
+            addCriterion("reply_text not like", value, "replyText");
+            return (Criteria) this;
+        }
+
+        public Criteria andReplyTextIn(List<String> values) {
+            addCriterion("reply_text in", values, "replyText");
+            return (Criteria) this;
+        }
+
+        public Criteria andReplyTextNotIn(List<String> values) {
+            addCriterion("reply_text not in", values, "replyText");
+            return (Criteria) this;
+        }
+
+        public Criteria andReplyTextBetween(String value1, String value2) {
+            addCriterion("reply_text between", value1, value2, "replyText");
+            return (Criteria) this;
+        }
+
+        public Criteria andReplyTextNotBetween(String value1, String value2) {
+            addCriterion("reply_text not between", value1, value2, "replyText");
+            return (Criteria) this;
+        }
+
         public Criteria andLikeCountIsNull() {
             addCriterion("like_count is null");
             return (Criteria) this;

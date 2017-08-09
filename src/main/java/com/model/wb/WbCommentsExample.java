@@ -445,6 +445,76 @@ public class WbCommentsExample {
             return (Criteria) this;
         }
 
+        public Criteria andTopicTextIsNull() {
+            addCriterion("topic_text is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andTopicTextIsNotNull() {
+            addCriterion("topic_text is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andTopicTextEqualTo(String value) {
+            addCriterion("topic_text =", value, "topicText");
+            return (Criteria) this;
+        }
+
+        public Criteria andTopicTextNotEqualTo(String value) {
+            addCriterion("topic_text <>", value, "topicText");
+            return (Criteria) this;
+        }
+
+        public Criteria andTopicTextGreaterThan(String value) {
+            addCriterion("topic_text >", value, "topicText");
+            return (Criteria) this;
+        }
+
+        public Criteria andTopicTextGreaterThanOrEqualTo(String value) {
+            addCriterion("topic_text >=", value, "topicText");
+            return (Criteria) this;
+        }
+
+        public Criteria andTopicTextLessThan(String value) {
+            addCriterion("topic_text <", value, "topicText");
+            return (Criteria) this;
+        }
+
+        public Criteria andTopicTextLessThanOrEqualTo(String value) {
+            addCriterion("topic_text <=", value, "topicText");
+            return (Criteria) this;
+        }
+
+        public Criteria andTopicTextLike(String value) {
+            addCriterion("topic_text like", value, "topicText");
+            return (Criteria) this;
+        }
+
+        public Criteria andTopicTextNotLike(String value) {
+            addCriterion("topic_text not like", value, "topicText");
+            return (Criteria) this;
+        }
+
+        public Criteria andTopicTextIn(List<String> values) {
+            addCriterion("topic_text in", values, "topicText");
+            return (Criteria) this;
+        }
+
+        public Criteria andTopicTextNotIn(List<String> values) {
+            addCriterion("topic_text not in", values, "topicText");
+            return (Criteria) this;
+        }
+
+        public Criteria andTopicTextBetween(String value1, String value2) {
+            addCriterion("topic_text between", value1, value2, "topicText");
+            return (Criteria) this;
+        }
+
+        public Criteria andTopicTextNotBetween(String value1, String value2) {
+            addCriterion("topic_text not between", value1, value2, "topicText");
+            return (Criteria) this;
+        }
+
         public Criteria andCommentsIdIsNull() {
             addCriterion("comments_id is null");
             return (Criteria) this;

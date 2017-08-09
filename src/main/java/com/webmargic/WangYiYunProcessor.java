@@ -7,10 +7,14 @@ import com.model.WyyComment;
 import com.model.WyyHotComment;
 import com.model.WyyMusic;
 import com.model.WyyUser;
+import com.model.common.RequestTaskModel;
 import com.service.IWangYiYunService;
+import com.webmargic.utils.CommentUtils;
 import com.webmargic.utils.WangYiYunEncryptUtils;
 import com.webmargic.vo.CommentVO;
 import com.webmargic.vo.RequestModel;
+import com.webmargic.vo.wyy.KeywordModel;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -20,13 +24,13 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import us.codecraft.webmagic.Page;
 import us.codecraft.webmagic.Site;
 import us.codecraft.webmagic.processor.PageProcessor;
 
 import java.io.IOException;
-import java.math.BigInteger;
-import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -38,20 +42,27 @@ import java.util.Map;
  * @email liukx@elab-plus.com
  **/
 public class WangYiYunProcessor implements PageProcessor {
-
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
     // 1. 周杰伦歌曲评论地址:http://music.163.com/artist?id=6452
     private IWangYiYunService wangYiYunService;
 
-    private String url;
+    private String url = "http://music.163.com/song?id=186016";
 
-    public WangYiYunProcessor(IWangYiYunService wangYiYunService, String url) {
+    private String keyword;
+
+    public WangYiYunProcessor(IWangYiYunService wangYiYunService, RequestTaskModel requestTaskModel) {
         this.wangYiYunService = wangYiYunService;
-        this.url = url;
+        if (StringUtils.isNotBlank(requestTaskModel.getUrl())) {
+            this.url = requestTaskModel.getUrl();
+        }
+        this.keyword = requestTaskModel.getKeyword();
     }
 
     private Site site;
 
     private String contentMatch = "http://music.163.com/song\\?id=\\d+";
+
+    private String searchMatch = "http://music.163.com/#/search/m/";
 
     //加密使用到的文本
     public static final String TEXT = "{\"username\": \"\", \"rememberLogin\": \"true\", \"password\": \"\", \"offset\": \"\"}";
@@ -66,72 +77,128 @@ public class WangYiYunProcessor implements PageProcessor {
      * @param page
      */
     public void process(Page page) {
-        if (page.getUrl().regex(contentMatch).match()) {
-            RequestModel model = new RequestModel();
-            model.setLimit(100);
-            model.setTotal(false);
-            model.setOffset(0);
-            // 歌曲的url
-            String url = page.getUrl().toString();
-            // 歌曲编号
-            String musicId = url.substring(url.indexOf("id=") + 3);
-            String zuozhe = page.getHtml().xpath("//*span/a[@class=s-fc7]/text()").get();
-            String album = page.getHtml().xpath("//*p/a[@class=s-fc7]/text()").get();
-            String musicName = page.getHtml().xpath("//*div/em[@class=f-ff2]/text()").get();
-            JSONObject jsonObject = JSON.parseObject(crawlAjaxUrl(musicId, model));
-            Integer total = jsonObject.getInteger("total");
-            Integer totalCount = total;
-            for (int c = 0; c < 100 + 1; c++) {
-                model.setOffset(c * 100);
-                jsonObject = JSON.parseObject(crawlAjaxUrl(musicId, model));
-                JSONArray hotComments = jsonObject.getJSONArray("hotComments");
-                JSONArray comments = jsonObject.getJSONArray("comments");
 
-                CommentVO vo = new CommentVO();
-                List<WyyHotComment> hotCommentList = new ArrayList<WyyHotComment>();
-                List<WyyUser> userList = new ArrayList<WyyUser>();
-                List<WyyComment> commentList = new ArrayList<WyyComment>();
-
-
-                // 热评
-                if (hotComments != null) {
-                    for (int i = 0; i < hotComments.size(); i++) {
-                        JSONObject hotComments1 = hotComments.getJSONObject(i);
-                        insertHotComment(hotComments1, musicId, url, hotCommentList, userList);
-                    }
-                }
-                if (comments != null) {
-                    // 评论
-                    for (int i = 0; i < comments.size(); i++) {
-                        JSONObject commentsObject = comments.getJSONObject(i);
-                        insertComment(commentsObject, musicId, url, commentList, userList);
-                    }
-                }
-                vo.setHotComment(hotCommentList);
-                vo.setUser(userList);
-                vo.setComments(commentList);
-
-                WyyMusic music = new WyyMusic();
-                music.setComment_count(total);
-                music.setName(zuozhe);
-                music.setMusic_Album(album);
-                music.setMusic_name(musicName);
-                music.setTime(new Date());
-                music.setMusic_url(url);
-                music.setMusic_id(Integer.valueOf(musicId));
-                if (c == 0) {
-                    vo.setMusic(music);
-                }
-                wangYiYunService.insertMusic(vo);
-            }
+        // 关键字搜索
+        if (StringUtils.isNotBlank(keyword)) {
+            logger.debug("网易云 - 关键字搜索开始  搜索的关键字 : " + keyword);
+            keywodSearch(page, 0);
+        }
+        // 单个歌曲详情
+        else if (page.getUrl().regex(contentMatch).match()) {
+            logger.debug("网易云 - 开始爬取 单个歌曲详情 歌曲地址: " + page.getUrl());
+            singMusic(page);
         } else {
-            System.out.println("没有匹配");
+            logger.debug("网易云 - 开始爬取 歌曲列表 地址 - " + page.getUrl());
+            // 歌手列表页面
             page.addTargetRequests(page.getHtml().xpath("//*[@id=\"song-list-pre-cache\"]").xpath("div/ul/li/a").links().all());
+        }
+        logger.debug("网易云 - " + page.getUrl() + " 爬取结束...");
+    }
+
+    /**
+     * 单个歌曲处理
+     *
+     * @param page
+     */
+    private void singMusic(Page page) {
+        RequestModel model = new RequestModel();
+        model.setLimit(100);
+        model.setTotal(false);
+        model.setOffset(0);
+        // 歌曲的url
+        String url = page.getUrl().toString();
+        // 歌曲编号
+        String musicId = url.substring(url.indexOf("id=") + 3);
+        String zuozhe = page.getHtml().xpath("//*span/a[@class=s-fc7]/text()").get();
+        String album = page.getHtml().xpath("//*p/a[@class=s-fc7]/text()").get();
+        String musicName = page.getHtml().xpath("//*div/em[@class=f-ff2]/text()").get();
+        JSONObject jsonObject = JSON.parseObject(crawlAjaxUrl(musicId, model));
+        Integer total = jsonObject.getInteger("total");
+        Integer totalCount = total;
+        for (int c = 0; c < 100 + 1; c++) {
+            model.setOffset(c * 100);
+
+            jsonObject = JSON.parseObject(crawlAjaxUrl(musicId, model));
+            JSONArray hotComments = jsonObject.getJSONArray("hotComments");
+            JSONArray comments = jsonObject.getJSONArray("comments");
+
+            CommentVO vo = new CommentVO();
+            List<WyyHotComment> hotCommentList = new ArrayList<WyyHotComment>();
+            List<WyyUser> userList = new ArrayList<WyyUser>();
+            List<WyyComment> commentList = new ArrayList<WyyComment>();
+            // 热评
+            if (hotComments != null) {
+                for (int i = 0; i < hotComments.size(); i++) {
+                    JSONObject hotComments1 = hotComments.getJSONObject(i);
+                    insertHotComment(hotComments1, musicId, url, hotCommentList, userList);
+                }
+            }
+            if (comments != null) {
+                // 评论
+                for (int i = 0; i < comments.size(); i++) {
+                    JSONObject commentsObject = comments.getJSONObject(i);
+                    insertComment(commentsObject, musicId, url, commentList, userList);
+                }
+            }
+            vo.setHotComment(hotCommentList);
+            vo.setUser(userList);
+            vo.setComments(commentList);
+
+            WyyMusic music = new WyyMusic();
+            music.setComment_count(total);
+            music.setName(zuozhe);
+            music.setMusic_Album(album);
+            music.setMusic_name(musicName);
+            music.setTime(new Date());
+            music.setMusic_url(url);
+            music.setMusic_id(Integer.valueOf(musicId));
+            if (c == 0) {
+                vo.setMusic(music);
+            }
+            wangYiYunService.insertMusic(vo);
+        }
+    }
+
+    /**
+     * 关键字查询处理
+     *
+     * @param page   页面处理类
+     * @param offset 起始值 - 递归入参
+     */
+    private void keywodSearch(Page page, int offset) {
+        int defaultSize = 30;
+        KeywordModel keywordModel = new KeywordModel();
+        keywordModel.setS(keyword);
+        keywordModel.setLimit(defaultSize);
+        keywordModel.setOffset(offset);
+        //默认歌曲
+        keywordModel.setType("1");
+        String s = crawlSearchUrl(keywordModel);
+        JSONObject jsonObject = JSON.parseObject(s);
+        JSONObject result = jsonObject.getJSONObject("result");
+        Integer songCount = result.getInteger("songCount");
+        JSONArray songs = result.getJSONArray("songs");
+        List<String> urlList = new ArrayList<>();
+        for (int i = 0; i < songs.size(); i++) {
+            JSONObject song = songs.getJSONObject(i);
+            Integer id = song.getInteger("id");
+            String url = "http://music.163.com/song?id=" + id;
+            System.out.println("u - " + url);
+            urlList.add(url);
+        }
+        int nextOffset = keywordModel.getOffset() + defaultSize;
+        page.addTargetRequests(urlList);
+        if (nextOffset < songCount) {
+            keywodSearch(page, nextOffset);
+        } else {
+            // 关键字查询完毕,清空,交给爬虫去爬地址页面
+            keyword = null;
         }
     }
 
     /**
      * 添加热评
+     *
      * @param hotComments1
      * @param musicId
      * @param url
@@ -167,6 +234,7 @@ public class WangYiYunProcessor implements PageProcessor {
 
     /**
      * 添加普通评论
+     *
      * @param hotComments1
      * @param musicId
      * @param url
@@ -177,6 +245,12 @@ public class WangYiYunProcessor implements PageProcessor {
         WyyComment hotComment = new WyyComment();
         // 评论
         String content = hotComments1.getString("content");
+
+        if (!CommentUtils.commentFilter(content)) {
+            return;
+        }
+
+
         // 点赞总数
         int likedCount = hotComments1.getInteger("likedCount");
         // 评论时间
@@ -202,6 +276,7 @@ public class WangYiYunProcessor implements PageProcessor {
 
     /**
      * 添加用户
+     *
      * @param hotComments1
      * @param userList
      */
@@ -253,11 +328,9 @@ public class WangYiYunProcessor implements PageProcessor {
 
         try {
             //参数加密
-            String secKey = new BigInteger(100, new SecureRandom()).toString(32).substring(0, 16);
             String text = JSON.toJSONString(requestModel);
             System.out.println("请求参数:" + text);
             Map<String, String> encrypt = WangYiYunEncryptUtils.encrypt(text);
-//            System.out.println("加密时间:"+encrypt);
             HttpPost httpPost = new HttpPost("http://music.163.com/weapi/v1/resource/comments/R_SO_4_" + songId + "/?csrf_token=");
             httpPost.addHeader("Referer", BASE_URL);
 
@@ -289,18 +362,73 @@ public class WangYiYunProcessor implements PageProcessor {
         return "";
     }
 
+
+    /**
+     * 关键字搜索查询
+     *
+     * @param requestModel
+     * @return
+     */
+    public static String crawlSearchUrl(KeywordModel requestModel) {
+        CloseableHttpClient httpclient = HttpClients.createDefault();
+        CloseableHttpResponse response = null;
+
+        try {
+            //参数加密
+            String text = JSON.toJSONString(requestModel);
+            System.out.println("请求参数 : " + text);
+            Map<String, String> encrypt = WangYiYunEncryptUtils.encrypt(text);
+            HttpPost httpPost = new HttpPost("http://music.163.com/weapi/cloudsearch/get/web?csrf_token=");
+
+            List<NameValuePair> ls = new ArrayList<NameValuePair>();
+            ls.add(new BasicNameValuePair("params", encrypt.get("params").toString()));
+            ls.add(new BasicNameValuePair("encSecKey", encrypt.get("encSecKey").toString()));
+            UrlEncodedFormEntity paramEntity = new UrlEncodedFormEntity(ls, "utf-8");
+            httpPost.setEntity(paramEntity);
+
+            response = httpclient.execute(httpPost);
+            HttpEntity entity = response.getEntity();
+
+            if (entity != null) {
+                return EntityUtils.toString(entity, "utf-8");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                response.close();
+                httpclient.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return "";
+    }
+
     public static void main(String[] args) {
 //        IWangYiYunService wangYiYunService = new WangYiYunServiceImpl();
-//        Spider.create(new WangYiYunProcessor()).thread(5).run();
-        int count = 66823 - 559 - 1;
-        RequestModel req = new RequestModel();
-        req.setLimit(20);
-        req.setOffset(count * 20);
-        req.setTotal(false);
-        String s = crawlAjaxUrl("418603077", req);
-        JSONObject jsonObject = JSON.parseObject(s);
-        System.out.println(s);
-
-//   TtrnVsXpngdFQpkSwHJLG8Wq8wJ5YmAlndHmzP2PsFhxF9G7oUxOWUns821mSjnKK58VF3RUxl1D
+//        RequestTaskModel model = new RequestTaskModel();
+//        model.setUrl("http://music.163.com/#/search/m/?%23%2F404=&s=%E5%8F%AF%E6%83%9C&type=1");
+//        Spider.create(new WangYiYunProcessor(null,null,null)).thread(5).run();
+//        int count = 66823 - 559 - 1;
+//        RequestModel req = new RequestModel();
+//        req.setLimit(20);
+//        req.setOffset(0 * 20);
+//        req.setTotal(false);
+//        String s = crawlAjaxUrl("418603077", req);
+//        System.out.println(s);
+//        JSONObject jsonObject = JSON.parseObject(s);
+//        System.out.println(s);
+//        String s = crawlSearchUrl();
+//        JSONObject jsonObject = JSON.parseObject(s);
+//        System.out.println("sss");
+//        System.out.println(s);
+//        JSONObject jsonObject = JSON.parseObject(text);
+//        System.out.println(jsonObject.toJSONString());
+//        String text = "{\"rid\":\"R_SO_4_186016\",\"offset\":\"40\",\"total\":\"false\",\"limit\":\"20\",\"csrf_token\":\"\"}";
+//        String s = crawlAjaxUrl("186016", null);
+//        System.out.println(s);
     }
 }

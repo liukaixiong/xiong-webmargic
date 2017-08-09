@@ -2,6 +2,7 @@ package com.service;/**
  * Created by liukx on 2017/4/19.
  */
 
+import com.model.common.RequestTaskModel;
 import com.model.common.ResultDTO;
 import com.model.zh.ZhRequestModel;
 
@@ -23,8 +24,8 @@ public interface ZhiHuService {
     /**
      * 知乎抓去对象
      *
-     * @param search
+     * @param requestModel 请求任务实体
      * @return
      */
-    public ResultDTO zhCrawler(String search);
+    public ResultDTO crawler(RequestTaskModel requestModel);
 }

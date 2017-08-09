@@ -3,52 +3,52 @@ package com.model.wb;
 import java.util.Date;
 
 public class WbTopic {
-     // 
-     // 表字段 : wb_topic.id
+    //
+    // 表字段 : wb_topic.id
     private Integer id;
 
-     // 用户编号
-     // 表字段 : wb_topic.user_no
+    // 用户编号
+    // 表字段 : wb_topic.user_no
     private String userNo;
 
-     // 用户昵称
-     // 表字段 : wb_topic.username
+    // 用户昵称
+    // 表字段 : wb_topic.username
     private String username;
 
-     // 用户主页
-     // 表字段 : wb_topic.home_page
+    // 用户主页
+    // 表字段 : wb_topic.home_page
     private String homePage;
 
-     // 话题编号
-     // 表字段 : wb_topic.topic_id
+    // 话题编号
+    // 表字段 : wb_topic.topic_id
     private String topicId;
 
-     // 转发总数
-     // 表字段 : wb_topic.forward_count
+    // 转发总数
+    // 表字段 : wb_topic.forward_count
     private Integer forwardCount;
 
-     // 评论总数
-     // 表字段 : wb_topic.comments_count
+    // 评论总数
+    // 表字段 : wb_topic.comments_count
     private Integer commentsCount;
 
-     // 点赞总数
-     // 表字段 : wb_topic.like_count
+    // 点赞总数
+    // 表字段 : wb_topic.like_count
     private Integer likeCount;
 
-     // 创建时间
-     // 表字段 : wb_topic.created
+    // 创建时间
+    // 表字段 : wb_topic.created
     private String created;
 
-     // 系统生成时间
-     // 表字段 : wb_topic.system_time
+    // 系统生成时间
+    // 表字段 : wb_topic.system_time
     private Date systemTime;
 
-     // 内容
-     // 表字段 : wb_topic.content
+    // 内容
+    // 表字段 : wb_topic.content
     private String content;
 
     /**
-     * 描述 ： 
+     * 描述 ：
      * 对应数据库： ->  wb_topic.id
      *
      * @mbg.generated
@@ -58,7 +58,7 @@ public class WbTopic {
     }
 
     /**
-     * 描述 ： 
+     * 描述 ：
      * 对应数据库： ->  wb_topic.id
      *
      * @mbg.generated

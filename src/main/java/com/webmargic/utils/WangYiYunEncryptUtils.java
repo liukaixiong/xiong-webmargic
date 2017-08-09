@@ -1,6 +1,6 @@
 package com.webmargic.utils;
 
-import org.apache.commons.lang.RandomStringUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 import sun.misc.BASE64Encoder;
 
 import javax.crypto.Cipher;
@@ -62,9 +62,9 @@ public class WangYiYunEncryptUtils {
             Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
             cipher.init(Cipher.ENCRYPT_MODE, skeySpec, iv);
 
-            byte[] encrypted = cipher.doFinal(text.getBytes());
-
-            return new BASE64Encoder().encode(encrypted);
+            byte[] encrypted = cipher.doFinal(text.getBytes("UTF-8"));
+            String encode = new BASE64Encoder().encode(encrypted);
+            return encode;
         } catch (Exception e) {
             return "";
         }
@@ -97,10 +97,35 @@ public class WangYiYunEncryptUtils {
 //        RequestModel requestModel = new RequestModel();
 //        requestModel.setLimit(20);
 //        requestModel.setOffset(1);
-//        String text = JSON.toJSONString(requestModel);
+//        String text = "{\"logs\":\"[{\"action\":\"searchkeywordclient\",\"json\":{\"type\":\"song\",\"keyword\":\"如果\",\"offset\":210}}]\",\"csrf_token\":\"\"}";
+//        JSONObject json = new JSONObject();
+//        json.put("type","song");
+//        json.put("keyword","如果");
+//        json.put("offset","300");
+//        JSONObject node = new JSONObject();
+//        node.put("action","searchkeywordclient");
+//        node.put("json",json);
+//
+//        List<JSONObject> list = new ArrayList<>();
+//        list.add(node);
+//        JSONObject logs = new JSONObject();
+//        logs.put("logs", JSON.toJSONString(list));
+//        logs.put("csrf_token","");
+
+//        JSONObject jsonObject = JSON.parseObject(text);
+//        System.out.println(logs.toJSONString());
+//        JSONObject json = new JSONObject();
+//        json.put("b","a");
+//        json.put("a","b");
+//        Map map = new HashMap<>();
+//        map.put("b","a");
+//        map.put("a","b");
+        String text = "{\"logs\":\"[{\"action\":\"searchkeywordclient\",\"json\":{\"type\":\"song\",\"keyword\":\"如果\",\"offset\":330}}]\"}";
+        aesEncrypt(text, nonce);
 //        Map<String, String> encrypt = WangYiYunEncryptUtils.encrypt(text);
-//        System.out.println(encrypt.toString());
-        String username = "444368875%40qq.com";
+//        System.out.println("---encSecKey----" + encrypt.get("encSecKey").toString());
+//        System.out.println("----params---" + encrypt.get("params").toString());
+//        String username = "444368875%40qq.com";
 //        String encode = new BASE64Encoder().encode(username);
 //        System.out.println(encode);
     }

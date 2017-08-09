@@ -1,5 +1,6 @@
 package com.webmargic.main;
 
+import com.model.common.RequestTaskModel;
 import com.service.IWangYiYunService;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -17,7 +18,11 @@ public class WangYiYunTest {
         ApplicationContext applicationContext = new ClassPathXmlApplicationContext(xml);
         IWangYiYunService wangYiYunService = (IWangYiYunService) applicationContext.getBean("wangYiYunService");
         Long start = System.currentTimeMillis();
-        wangYiYunService.wyyCrawler("http://music.163.com/artist?id=6452");
+        RequestTaskModel model = new RequestTaskModel();
+        // 注意连接是否是https类型的, 目前只支持http:
+        model.setUrl("http://music.163.com/song?id=27566765");
+//        model.setKeyword("夜的钢琴曲");
+        wangYiYunService.crawler(model);
         Long end = System.currentTimeMillis();
         System.out.println(" -----------------------耗时---------------------" + (end - start));
 //        MongoTemplate mongoTemplate = (MongoTemplate) applicationContext.getBean("mongoTemplate");

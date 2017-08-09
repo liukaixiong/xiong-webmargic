@@ -10,6 +10,6 @@
 
 
 
-	<context:component-scan base-package="com.service,com.dao.mongodb,com.converter"></context:component-scan>
+	<context:component-scan base-package="com.service,com.dao.mongodb,com.dao.es,com.converter"></context:component-scan>
 	
 </beans>

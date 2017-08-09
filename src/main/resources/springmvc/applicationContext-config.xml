@@ -31,9 +31,9 @@
 
 
 
-	<!--<mvc:resources mapping="/web-static/js/**" location="/web-static/js/" />-->
-	<!--<mvc:resources mapping="/web-static/css/**" location="/web-static/css/" />-->
-	<!--<mvc:resources mapping="/web-static/images/**" location="/web-static/images/" />-->
+	<mvc:resources mapping="/js/**" location="/web-static/js/" />
+	<mvc:resources mapping="/css/**" location="/web-static/css/" />
+	<mvc:resources mapping="/images/**" location="/web-static/images/" />
 	<!--<mvc:resources mapping="/web-static/fonts/**" location="/web-static/fonts/" />-->
 
 	<bean

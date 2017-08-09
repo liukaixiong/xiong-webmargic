@@ -4,10 +4,13 @@ import com.dao.ZhAnswerCommentsMapper;
 import com.dao.ZhAnswerMapper;
 import com.dao.ZhQuestionMapper;
 import com.dao.ZhUserMapper;
+import com.model.common.RequestTaskModel;
 import com.model.common.ResultDTO;
 import com.model.zh.*;
 import com.service.ZhiHuService;
 import com.webmargic.ZhiHuProcessor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
@@ -24,6 +27,8 @@ import java.util.List;
  **/
 @Service("zhiHuService")
 public class ZhiHuServiceImpl implements ZhiHuService {
+
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
     private ZhAnswerCommentsMapper answerCommentsMapper;
@@ -47,7 +52,7 @@ public class ZhiHuServiceImpl implements ZhiHuService {
         ZhQuestion question = requestModel.getQuestion();
         try {
             int insert = questionMapper.insert(question);
-            System.out.println("添加问题成功 : " + question.getTitle());
+            logger.info("知乎 _ 添加问题成功 : " + question.getTitle());
         } catch (Exception e) {
             if (e instanceof DuplicateKeyException) {
                 return;
@@ -60,10 +65,14 @@ public class ZhiHuServiceImpl implements ZhiHuService {
         // 添加答题内容
         List<ZhAnswer> answerList = requestModel.getAnswerList();
         if (answerList.size() > 0) {
+            int successCount = 0;
             for (int i = 0; i < answerList.size(); i++) {
                 ZhAnswer answer = answerList.get(i);
                 try {
                     int insert1 = answerMapper.insert(answer);
+                    if (insert1 > 0) {
+                        successCount++;
+                    }
                 } catch (Exception e) {
                     if (e instanceof DuplicateKeyException) {
                         return;
@@ -73,15 +82,20 @@ public class ZhiHuServiceImpl implements ZhiHuService {
                     }
                 }
             }
+            logger.info("知乎 _ 添加答题成功 :  本次一个添加答题 [" + answerList.size() + "] 个 _ 最终 成功 [" + successCount + "]");
         }
 
         // 添加评论内容
         List<ZhAnswerComments> commentsList = requestModel.getCommentsList();
         if (commentsList.size() > 0) {
+            int successCount = 0;
             for (int i = 0; i < commentsList.size(); i++) {
                 ZhAnswerComments comments = commentsList.get(i);
                 try {
-                    answerCommentsMapper.insert(comments);
+                    int insert = answerCommentsMapper.insert(comments);
+                    if (insert > 0) {
+                        successCount++;
+                    }
                 } catch (Exception e) {
                     if (e instanceof DuplicateKeyException) {
                         return;
@@ -91,15 +105,20 @@ public class ZhiHuServiceImpl implements ZhiHuService {
                     }
                 }
             }
+            logger.info("知乎 _ 添加评论成功 :  本次一共添加 [" + commentsList.size() + "] 个 _ 最终 成功 [" + successCount + "]");
         }
 
         // 添加用户信息
         List<ZhUser> userList = requestModel.getUserList();
         if (userList.size() > 0) {
+            int successCount = 0;
             for (int i = 0; i < userList.size(); i++) {
                 ZhUser user = userList.get(i);
                 try {
-                    userMapper.insert(user);
+                    int insert = userMapper.insert(user);
+                    if (insert > 0) {
+                        successCount++;
+                    }
                 } catch (Exception e) {
                     if (e instanceof DuplicateKeyException) {
                         return;
@@ -109,18 +128,13 @@ public class ZhiHuServiceImpl implements ZhiHuService {
                     }
                 }
             }
+            logger.info("知乎 _ 添加用户成功 :  本次一共添加 [" + userList.size() + "] 个 _ 最终 成功 [" + successCount + "]");
         }
-        System.out.println("★★★★★★★★★添加成功★★★★★★★★★★★");
+        logger.info("★★★★★★★★★知乎数据添加成功★★★★★★★★★★★");
     }
 
-    /**
-     * 爬虫地址主入口
-     *
-     * @param search 发现查询关键字
-     * @return
-     */
-    public ResultDTO zhCrawler(String search) {
-        Spider.create(new ZhiHuProcessor(this, search)).thread(10).run();
+    public ResultDTO crawler(RequestTaskModel requestModel) {
+        Spider.create(new ZhiHuProcessor(this, requestModel)).thread(10).run();
         return ResultDTO.isOK(null);
     }
 }

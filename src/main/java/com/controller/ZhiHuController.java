@@ -26,8 +26,8 @@ public class ZhiHuController {
     @RequestMapping(value = "/search", method = RequestMethod.GET, produces = "application/json;charset=UTF-8")
     @ResponseBody
     public ResultDTO insertEvaluate(@RequestParam("q") String search) {
-        ResultDTO resultDTO = zhiHuService.zhCrawler(search);
-        return resultDTO;
+//        ResultDTO resultDTO = zhiHuService.zhCrawler(search);
+        return null;
     }
 
 
