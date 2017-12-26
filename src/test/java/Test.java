@@ -33,7 +33,7 @@ import java.util.List;
 public class Test {
 
     public static void main(String[] args) {
-        login("444368875@qq.com", "lkx3551211");
+        login("", "");
     }
 
     public static String login(String u, String p) {

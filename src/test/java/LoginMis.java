@@ -86,7 +86,7 @@ public class LoginMis {
 //        String text = HttpClientUtil.doGetHeader("http://localhost:8080/dd/tag/info", map);
 //        System.out.println(text);
         LoginMis l = new LoginMis();
-        String cookie = l.getCookie("18321006757", "lkx3551211");
+        String cookie = l.getCookie("", "");
         Map params = new HashMap<>();
 //        map.put("Cookie", cookie);
         params.put("content", "哈哈，我是上次那个测试的人哟~");

@@ -49,7 +49,7 @@ public class HttpRequest {
             // 判断代理是否设置成功
             // 发送 GET 请求
             System.out.println(sendGet(
-                    "http://www.toutiao.com/i6428397252825317889/",
+                    "https://www.jianshu.com/p/828035ec764f",
                     ""));
             // 发送 POST 请求
         }
