@@ -20,7 +20,8 @@ public class ZhiHuTest {
         ApplicationContext applicationContext = new ClassPathXmlApplicationContext(xml);
         ZhiHuService zhiHuService = (ZhiHuService) applicationContext.getBean("zhiHuService");
         RequestTaskModel requestTaskModel = new RequestTaskModel();
-        requestTaskModel.setUrl("https://www.zhihu.com/question/27660727?utm_source=com.netease.mobimail&utm_medium=social");
+        //https://www.zhihu.com/question/27660727?utm_source=com.netease.mobimail&utm_medium=social
+        requestTaskModel.setUrl("https://www.zhihu.com/question/19770699");
         zhiHuService.crawler(requestTaskModel);
 //        zhiHuService.zhCrawler("周杰伦");
     }

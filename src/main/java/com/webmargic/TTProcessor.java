@@ -5,8 +5,9 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.model.common.RequestTaskModel;
 import com.model.es.EsModel;
+import com.model.tt.TTCommentVO;
 import com.model.tt.TtComment;
-import com.service.TTService;
+import com.service.ICrawlerService;
 import com.webmargic.utils.CommentUtils;
 import com.webmargic.utils.HttpClientUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -27,7 +28,7 @@ import java.util.*;
  **/
 public class TTProcessor implements PageProcessor {
 
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
+    private Logger logger = LoggerFactory.getLogger(TTProcessor.class);
 
     private Site site;
 
@@ -53,12 +54,12 @@ public class TTProcessor implements PageProcessor {
 
 //    private EsClient es = new EsClient();
 
-    private TTService ttService;
+    private ICrawlerService crawlerService;
 
     private RequestTaskModel requestTaskModel;
 
-    public TTProcessor(TTService service, RequestTaskModel request) {
-        this.ttService = service;
+    public TTProcessor(ICrawlerService crawlerService, RequestTaskModel request) {
+        this.crawlerService = crawlerService;
         if (StringUtils.isNotBlank(request.getUrl())) {
             this.BASE_Node_URL = request.getUrl();
         }
@@ -85,6 +86,9 @@ public class TTProcessor implements PageProcessor {
             String itemsid = page.getHtml().xpath("/html/body/script").regex("item_id: '\\d+'").regex("\\d+").get();
             String groupId = url.substring(url.lastIndexOf("/a") + 2, url.length());
             String title = page.getHtml().xpath("//*[@id=\"article-main\"]/h1/text()").get();
+            if (StringUtils.isEmpty(title)) {
+                title = page.getHtml().xpath("title/text()").get();
+            }
             try {
                 getHttpComment(list, title, groupId.replace("/", ""), itemsid, 0);
             } catch (Exception e) {
@@ -99,7 +103,14 @@ public class TTProcessor implements PageProcessor {
             logger.error("头条没有匹配到相应的地址:" + page.getUrl().get());
             return;
         }
-        ttService.insertData(list);
+        logger.info(" 开始添加数据 数据大小 : " + list.size());
+        TTCommentVO ttCommentVO = new TTCommentVO();
+        ttCommentVO.setCommentList(list);
+        try {
+            crawlerService.insertData(ttCommentVO);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void resolveContent(Page page) {
@@ -138,7 +149,7 @@ public class TTProcessor implements PageProcessor {
         url.append("&aggr_type=1");
         url.append("&count=" + size);
         url.append("&offset=" + offset);
-        //System.out.println("请求的url : " + url.toString());
+        logger.debug("==================================请求的接口地址 : " + url.toString() + "===============");
         String json = HttpClientUtil.doGet(url.toString());
         JSONObject jsonObject = JSON.parseObject(json);
         JSONArray data = jsonObject.getJSONArray("data");
@@ -188,6 +199,7 @@ public class TTProcessor implements PageProcessor {
                 list.add(comment1);
             }
         }
+        logger.debug(" 处理完 [" + list.size() + "] 条数据 ");
         if (offset < count) {
             getHttpComment(list, title, groupId, itemsId, offset + size);
         }
@@ -210,7 +222,7 @@ public class TTProcessor implements PageProcessor {
 //        url.append("&format=true");
         url.append("&count=100");
         url.append("&&cur_tab=1");
-        System.out.println("请求参数:" + url.toString());
+        logger.info("请求参数:" + url.toString());
         Map header = new HashMap();
         header.put("Content-Type", "application/json");
         String dataJSON = HttpClientUtil.doGetHeader(url.toString(), header);
@@ -240,7 +252,7 @@ public class TTProcessor implements PageProcessor {
         }
 //        EsModel model = new EsModel();
 //        model.setIndex("title");
-        System.out.println(data);
+        logger.info(" 数据展示 : " + data.toJSONString());
     }
 
     public static void main(String[] args) throws Exception {

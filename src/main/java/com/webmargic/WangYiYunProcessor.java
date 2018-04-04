@@ -8,7 +8,7 @@ import com.model.WyyHotComment;
 import com.model.WyyMusic;
 import com.model.WyyUser;
 import com.model.common.RequestTaskModel;
-import com.service.IWangYiYunService;
+import com.service.ICrawlerService;
 import com.webmargic.utils.CommentUtils;
 import com.webmargic.utils.WangYiYunEncryptUtils;
 import com.webmargic.vo.CommentVO;
@@ -37,21 +37,25 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * 网易云评论抓取规则解析
+ *
  * @author Liukx
  * @create 2017-03-29 17:54
  * @email liukx@elab-plus.com
  **/
 public class WangYiYunProcessor implements PageProcessor {
+    private Integer maxReadComment = 10000;
+
     private Logger logger = LoggerFactory.getLogger(this.getClass());
     // 1. 周杰伦歌曲评论地址:http://music.163.com/artist?id=6452
-    private IWangYiYunService wangYiYunService;
+    private ICrawlerService crawlerService;
 
     private String url = "http://music.163.com/song?id=186016";
 
     private String keyword;
 
-    public WangYiYunProcessor(IWangYiYunService wangYiYunService, RequestTaskModel requestTaskModel) {
-        this.wangYiYunService = wangYiYunService;
+    public WangYiYunProcessor(ICrawlerService crawlerService, RequestTaskModel requestTaskModel) {
+        this.crawlerService = crawlerService;
         if (StringUtils.isNotBlank(requestTaskModel.getUrl())) {
             this.url = requestTaskModel.getUrl();
         }
@@ -113,11 +117,26 @@ public class WangYiYunProcessor implements PageProcessor {
         String album = page.getHtml().xpath("//*p/a[@class=s-fc7]/text()").get();
         String musicName = page.getHtml().xpath("//*div/em[@class=f-ff2]/text()").get();
         JSONObject jsonObject = JSON.parseObject(crawlAjaxUrl(musicId, model));
+        // 获取歌曲的评论总数
         Integer total = jsonObject.getInteger("total");
-        Integer totalCount = total;
-        for (int c = 0; c < 100 + 1; c++) {
-            model.setOffset(c * 100);
+        // 每条100条
+        int start = 0;
+        int pageSize = 100;
+        // 当总数大于1W时 , 开始划分成两组
+        if (total > maxReadComment) {
+            pageSize = total / pageSize;
+        }
 
+        List<WyyComment> commentListTest = new ArrayList<WyyComment>();
+
+        for (int c = start; c < pageSize; c++) {
+
+            // 当页数大于100时,则将起始值初始到倒数100页
+            if (pageSize > model.getLimit() && c == (model.getLimit() + 1)) {
+                c = pageSize - model.getLimit();
+            }
+
+            model.setOffset(c * 100);
             jsonObject = JSON.parseObject(crawlAjaxUrl(musicId, model));
             JSONArray hotComments = jsonObject.getJSONArray("hotComments");
             JSONArray comments = jsonObject.getJSONArray("comments");
@@ -155,7 +174,12 @@ public class WangYiYunProcessor implements PageProcessor {
             if (c == 0) {
                 vo.setMusic(music);
             }
-            wangYiYunService.insertMusic(vo);
+            commentListTest.addAll(commentList);
+            try {
+                crawlerService.insertData(vo);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -246,6 +270,7 @@ public class WangYiYunProcessor implements PageProcessor {
         // 评论
         String content = hotComments1.getString("content");
 
+        // 筛选评论
         if (!CommentUtils.commentFilter(content)) {
             return;
         }

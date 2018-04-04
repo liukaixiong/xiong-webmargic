@@ -2,9 +2,8 @@ package com.service;
 
 import com.model.common.RequestTaskModel;
 import com.model.common.ResultDTO;
+import com.model.tt.TTCommentVO;
 import com.model.tt.TtComment;
-
-import java.util.List;
 
 /**
  * 今日头条 爬虫存储 业务类
@@ -19,7 +18,7 @@ public interface TTService {
      *
      * @param requestModel
      */
-    public void insertData(List<TtComment> requestModel);
+    public void insertData(TTCommentVO requestModel);
 
     /**
      * 爬虫爬取对象

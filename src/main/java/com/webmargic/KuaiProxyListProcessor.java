@@ -16,6 +16,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.*;
 
 /**
  * 快代理ip获取
@@ -44,6 +45,10 @@ public class KuaiProxyListProcessor implements PageProcessor {
         this.url = url;
     }
 
+    private Executor executor = new ThreadPoolExecutor(0, 20,
+            60L, TimeUnit.SECONDS,
+            new SynchronousQueue<Runnable>());
+
     /**
      * 具体要执行的抓去内容处理
      *
@@ -58,8 +63,7 @@ public class KuaiProxyListProcessor implements PageProcessor {
             String ip = ipList.get(i);
             String port = portList.get(i);
             ProxyList run = new ProxyList(ip, port, url);
-            Thread t = new Thread(run);
-            t.start();
+            executor.execute(run);
         }
 
         index++;

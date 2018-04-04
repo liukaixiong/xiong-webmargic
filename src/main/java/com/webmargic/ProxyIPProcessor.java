@@ -16,6 +16,10 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executor;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 代理ip获取
@@ -45,6 +49,10 @@ public class ProxyIPProcessor implements PageProcessor {
         this.url = url;
     }
 
+    private Executor executor = new ThreadPoolExecutor(0, 20,
+            60L, TimeUnit.SECONDS,
+            new SynchronousQueue<Runnable>());
+
     /**
      * 具体要执行的抓去内容处理
      *
@@ -59,8 +67,7 @@ public class ProxyIPProcessor implements PageProcessor {
             String ip = ipList.get(i);
             String port = portList.get(i);
             ProxyList run = new ProxyList(ip, port, url);
-            Thread t = new Thread(run);
-            t.start();
+            executor.execute(run);
         }
 
         index++;

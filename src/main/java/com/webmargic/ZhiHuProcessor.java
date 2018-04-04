@@ -76,8 +76,8 @@ public class ZhiHuProcessor implements PageProcessor {
             System.out.println("抓取地址 -> " + url);
             // ajax 获取对应的答题参数
             ZhRequestModel requestModel = new ZhRequestModel();
-            sendHttpURLSub(requestModel, "https://www.zhihu.com/api/v4/questions/" + id + "/answers?include=data%5B*%5D.is_normal%2Cis_sticky%2Ccollapsed_by%2Csuggest_edit%2Ccomment_count%2Ccan_comment%2Ccontent%2Ceditable_content%2Cvoteup_count%2Creshipment_settings%2Ccomment_permission%2Cmark_infos%2Ccreated_time%2Cupdated_time%2Crelationship.is_authorized%2Cis_author%2Cvoting%2Cis_thanked%2Cis_nothelp%2Cupvoted_followees%3Bdata%5B*%5D.author.is_blocking%2Cis_blocked%2Cis_followed%2Cvoteup_count%2Cmessage_thread_token%2Cbadge%5B%3F(type%3Dbest_answerer)%5D.topics&sort_by=default", 0, 20);
             // 问题本身详情
+            sendHttpURLSub(requestModel, "https://www.zhihu.com/api/v4/questions/" + id + "/answers?include=data%5B*%5D.is_normal%2Cis_sticky%2Ccollapsed_by%2Csuggest_edit%2Ccomment_count%2Ccan_comment%2Ccontent%2Ceditable_content%2Cvoteup_count%2Creshipment_settings%2Ccomment_permission%2Cmark_infos%2Ccreated_time%2Cupdated_time%2Crelationship.is_authorized%2Cis_author%2Cvoting%2Cis_thanked%2Cis_nothelp%2Cupvoted_followees%3Bdata%5B*%5D.author.is_blocking%2Cis_blocked%2Cis_followed%2Cvoteup_count%2Cmessage_thread_token%2Cbadge%5B%3F(type%3Dbest_answerer)%5D.topics&sort_by=default", 0, 20);
             getQuestionsInfo(requestModel, page, id);
             zhiHuService.insertData(requestModel);
         } else {
@@ -130,8 +130,14 @@ public class ZhiHuProcessor implements PageProcessor {
         String liulanshu = page.getHtml().xpath("//*[@id=\"root\"]/div/main/div/div[1]/div[2]/div[1]/div[2]/div/div/div/div[3]/div[2]/text()").get();
         // 标题
         String title = page.getHtml().xpath("//*[@id=\"root\"]/div/main/div/div[1]/div[2]/div[1]/div[1]/h1/text()").get();
+        if (StringUtils.isEmpty(title)) {
+            title = page.getHtml().xpath("//*[@id=\"root\"]/div/main/div/div[1]/div/div/div/h1/text()").get();
+        }
         // 问题内容
         String wentiContent = page.getHtml().xpath("//*[@id=\"root\"]/div/main/div/div[1]/div[2]/div[1]/div[1]/div[2]/div/div/span/text()").get();
+        if (StringUtils.isEmpty(wentiContent)) {
+            wentiContent = page.getHtml().xpath("//*[@id=\"root\"]/div/main/div/div/div/div/div/div/div/div/div/span/text()").get();
+        }
         // 问题分类标签
         List<Selectable> tagsNode = page.getHtml().xpath("//*[@id=\"root\"]/div/main/div/div[1]/div[2]/div[1]/div[1]/div[1]/div").xpath("/div/span").xpath("/span/a/div/div/text()").nodes();
         StringBuffer tagString = new StringBuffer();
@@ -139,8 +145,8 @@ public class ZhiHuProcessor implements PageProcessor {
             tagString.append(tagsNode.toArray()[i] + " ");
         }
         question.setQuestionId(Integer.valueOf(id));
-        question.setFollowCount(Integer.valueOf(guanzhuzhe));
-        question.setBrowseCount(Integer.valueOf(liulanshu));
+        question.setFollowCount(guanzhuzhe == null ? 0 : Integer.valueOf(guanzhuzhe));
+        question.setBrowseCount(liulanshu == null ? 0 : Integer.valueOf(liulanshu));
         question.setTitle(title);
         question.setRemark(wentiContent);
         question.setTag(tagString.toString());
@@ -168,6 +174,7 @@ public class ZhiHuProcessor implements PageProcessor {
         JSONObject paging = resultObject.getJSONObject("paging");
         JSONArray dataArrays = resultObject.getJSONArray("data");
         Integer total = paging.getInteger("totals");
+        logger.info(" 获取的数据大小 : " + total);
         zhRequestModel.getQuestion().setTotal(total);
         for (int i = 0; i < dataArrays.size(); i++) {
             JSONObject dataObject = dataArrays.getJSONObject(i);
@@ -222,7 +229,7 @@ public class ZhiHuProcessor implements PageProcessor {
         String id = jsonObject.getString("id");
         String name = jsonObject.getString("name");
         //过滤匿名用户
-        if (id.equals("0") || name.equals("知乎用户")) {
+        if ("0".equals(id) || "知乎用户".equals(name)) {
             return;
         }
 
@@ -345,7 +352,6 @@ public class ZhiHuProcessor implements PageProcessor {
         answer.setThanksCount(thanks_count);
         answer.setExcerpt(excerpt);
         answer.setIsCopyable(is_copyable);
-
         zhRequestModel.getAnswerList().add(answer);
         ///////////////////////评论详情/////////////////////////
         if (comment_count > 0) {

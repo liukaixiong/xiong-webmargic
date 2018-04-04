@@ -48,6 +48,7 @@ public class ZhiHuServiceImpl implements ZhiHuService {
      * @param requestModel
      */
     public void insertData(ZhRequestModel requestModel) {
+        logger.info(" 开始添加数据 ... ");
         // 添加问题
         ZhQuestion question = requestModel.getQuestion();
         try {

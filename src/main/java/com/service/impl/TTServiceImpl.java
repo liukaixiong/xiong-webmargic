@@ -2,13 +2,15 @@ package com.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.dao.TtCommentMapper;
+import com.enums.SourceEnum;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.model.common.RequestTaskModel;
 import com.model.common.ResultDTO;
+import com.model.tt.TTCommentVO;
 import com.model.tt.TtComment;
 import com.model.tt.TtCommentExample;
-import com.service.TTService;
+import com.service.ICrawlerService;
 import com.webmargic.TTProcessor;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -28,18 +30,24 @@ import java.util.List;
  * @email liukx@elab-plus.com
  **/
 @Service("ttService")
-public class TTServiceImpl implements TTService {
+public class TTServiceImpl implements ICrawlerService<TTCommentVO> {
 
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
+    private Logger logger = LoggerFactory.getLogger(TTServiceImpl.class);
 
     @Autowired
     private TtCommentMapper mapper;
 
-    public void insertData(List<TtComment> requestModel) {
+    @Override
+    public SourceEnum getSourceEnum() {
+        return SourceEnum.TOUTIAO;
+    }
+
+    public void insertData(TTCommentVO requestModel) {
         int count = 0;
-        if (requestModel.size() > 0) {
-            for (int i = 0; i < requestModel.size(); i++) {
-                TtComment ttComment = requestModel.get(i);
+        List<TtComment> commentList = requestModel.getCommentList();
+        if (commentList.size() > 0) {
+            for (int i = 0; i < commentList.size(); i++) {
+                TtComment ttComment = commentList.get(i);
                 try {
                     int insert = mapper.insert(ttComment);
                     if (insert > 0) {
@@ -47,6 +55,7 @@ public class TTServiceImpl implements TTService {
                     }
                 } catch (Exception e) {
                     if (e instanceof DuplicateKeyException) {
+                        logger.info("遇到重复数据_____结束添加..");
                         return;
                     } else {
                         logger.error("错误异常: " + e.getMessage() + "\t 错误参数:" + JSON.toJSONString(ttComment));
@@ -54,14 +63,8 @@ public class TTServiceImpl implements TTService {
                 }
             }
         }
-
-        logger.info("头条评论 一共[" + requestModel.size() + "]  成功 -> " + count);
+        logger.info("头条评论 一共[" + commentList.size() + "]  成功 -> " + count);
     }
-
-//    public ResultDTO zhCrawler(String search) {
-//        Spider.create(new TTProcessor(this, search)).thread(5).run();
-//        return ResultDTO.isNo(null);
-//    }
 
     public ResultDTO crawler(RequestTaskModel requestModel) {
         Spider.create(new TTProcessor(this, requestModel)).thread(5).run();
@@ -95,7 +98,7 @@ public class TTServiceImpl implements TTService {
         }
 
         // 点赞数小于
-        if(StringUtils.isNotBlank(model.getLikeMax())){
+        if (StringUtils.isNotBlank(model.getLikeMax())) {
             criteria.andLikeCountLessThan(Integer.valueOf(model.getLikeMax()));
         }
 

@@ -52,6 +52,8 @@
             <div class="layui-input-block">
                 <button class="layui-btn" lay-submit="" lay-filter="demo1">查询</button>
                 <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                <button type="button" id="testBTN" class="layui-btn layui-btn-primary">测试</button>
+                <a href="https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx55d4c9f89b3b743f&redirect_uri=http://lkx.free.ngrok.cc/weChat/getOpenId&response_type=code&scope=snsapi_base&state=STATE#wechat_redirect">ssss</a>
             </div>
         </div>
 </form>
@@ -160,7 +162,28 @@
             });
         }
 
+        $("#testBTN").click(function(){
+            $.ajax({
+                type: "get",
+                url: "https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx55d4c9f89b3b743f&redirect_uri=http://lkx.free.ngrok.cc/weChat/getOpenId&response_type=code&scope=snsapi_base&state=STATE#wechat_redirect",
+//                dataType: "json",
+                success: function (data) {
+                    debugger;
+                    alert(data);
+                },
+                error: function (data) {
+                    debugger;
+//                    layer.closeAll();
+                    layer.alert("审核失败");
+                }
+            });
+        })
+
     });
+
+
+
+
 </script>
 </body>
 </html>

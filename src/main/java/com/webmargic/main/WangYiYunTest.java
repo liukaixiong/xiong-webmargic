@@ -11,6 +11,15 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  * @email liukx@elab-plus.com
  **/
 public class WangYiYunTest {
+    /**
+     *  id 表示 :
+     *  [165405] 巴赫旧约 - 汪苏泷
+     *  [28193075]  在人间 - 王建房
+     *
+     *
+     *
+     * @param args
+     */
 
     public static void main(String[] args) {
         // 1. 周杰伦歌曲评论地址:http://music.163.com/artist?id=6452
@@ -20,7 +29,7 @@ public class WangYiYunTest {
         Long start = System.currentTimeMillis();
         RequestTaskModel model = new RequestTaskModel();
         // 注意连接是否是https类型的, 目前只支持http:
-        model.setUrl("http://music.163.com/song?id=27566765");
+        model.setUrl("http://music.163.com/song?id=186001");
 //        model.setKeyword("夜的钢琴曲");
         wangYiYunService.crawler(model);
         Long end = System.currentTimeMillis();

@@ -65,7 +65,7 @@ public class WeiBoUtils {
     }
 
     public static String login(String u, String p) throws Exception {
-        if(StringUtils.isBlank(u)||StringUtils.isBlank(p)){
+        if (StringUtils.isBlank(u) || StringUtils.isBlank(p)) {
             throw new Exception("帐号密码不能为空!");
         }
         DefaultHttpClient client = new DefaultHttpClient();
@@ -179,7 +179,7 @@ public class WeiBoUtils {
         Set<String> set = new HashSet<>();
         for (Header header : h) {
             System.out.println(header.toString());
-            if (header.getName().equals("Set-Cookie")) {
+            if ("Set-Cookie".equals(header.getName())) {
                 set.add(header.getValue());
             }
         }
@@ -223,7 +223,8 @@ public class WeiBoUtils {
      */
     private static HashMap<String, String> preLogin(String unameBase64, DefaultHttpClient client)
             throws IOException {
-        String url = "http://login.sina.com.cn/sso/prelogin.php?entry=weibo&callback=sinaSSOController.preloginCallBack&su=&rsakt=mod&client=ssologin.js(v1.4.5)&_=" + "_=" + new Date().getTime();
+        Long time = System.currentTimeMillis();
+        String url = "http://login.sina.com.cn/sso/prelogin.php?entry=weibo&callback=sinaSSOController.preloginCallBack&su=&rsakt=mod&client=ssologin.js(v1.4.5)&_=" + "_=" + time;
         return getParaFromResult(get(url, client));
     }
 
@@ -241,8 +242,9 @@ public class WeiBoUtils {
         for (int i = 0; i < r.length; i++) {
             temp = r[i].split(":");
             for (int j = 0; j < 2; j++) {
-                if (temp[j].contains("\""))
+                if (temp[j].contains("\"")) {
                     temp[j] = temp[j].substring(1, temp[j].length() - 1);
+                }
             }
             hm.put(temp[0], temp[1]);
         }

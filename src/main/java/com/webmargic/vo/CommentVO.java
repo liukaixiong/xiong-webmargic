@@ -51,4 +51,14 @@ public class CommentVO {
     public void setMusic(WyyMusic music) {
         this.music = music;
     }
+
+    @Override
+    public String toString() {
+        return "CommentVO{" +
+                "user=" + user +
+                ", hotComment=" + hotComment +
+                ", music=" + music +
+                ", comments=" + comments +
+                '}';
+    }
 }

@@ -8,20 +8,25 @@ import com.model.wb.WbComments;
 import com.model.wb.WbInsertModel;
 import com.model.wb.WbReply;
 import com.model.wb.WbTopic;
-import com.service.WeiBoService;
+import com.service.ICrawlerService;
 import com.webmargic.utils.CommentUtils;
 import com.webmargic.utils.HttpClientUtil;
 import com.webmargic.utils.WeiBoUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.util.Assert;
 import us.codecraft.webmagic.Page;
 import us.codecraft.webmagic.Site;
 import us.codecraft.webmagic.processor.PageProcessor;
 import us.codecraft.webmagic.selector.Html;
 import us.codecraft.webmagic.selector.Selectable;
 
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 微博网站
@@ -32,18 +37,12 @@ import java.util.concurrent.atomic.AtomicInteger;
  **/
 public class WeiBoProcessor implements PageProcessor {
 
-
+    private Logger logger = LoggerFactory.getLogger(WeiBoProcessor.class);
     private Site site;
 
     // 如果爬出来的页面不对劲,非常有可能是cookie过期了,请更换!!!
 //    private String cookie = "SINAGLOBAL=6308490169689.749.1488338237328; wb_publish_fist100_2630551761=1; un=444368875@qq.com; wvr=6; __utma=15428400.1852760086.1493011752.1493011752.1493011752.1; __utmz=15428400.1493011752.1.1.utmcsr=weibo.com|utmccn=(referral)|utmcmd=referral|utmcct=/friends; Hm_lvt_407473d433e871de861cf818aa1405a1=1493011448,1493011745,1493012254,1493013842; SCF=AiErfjlUf6oJkzA9r38SD-Aaf90ZPioEB8b4Suer34xVBOmi5UyAbRsh03hSbayaCnSYcleSBM1zP11bv0Wv96Y.; SUB=_2A251-4ofDeThGeRI6FIU9S_LzT2IHXVXcPzXrDV8PUJbmtBeLVP3kW9RN7UHVFm5_gDVloP0plxAsvroWg..; SUBP=0033WrSXqPxfM725Ws9jqgMF55529P9D9Wh22jMvZnZ9WKG0j2G0iqZs5JpX5o2p5NHD95QESoe7SK-pS0qpWs4Dqcj6i--Ri-i2i-8hi--Ri-isiKnNi--Ri-iWi-8Fi--NiKyFi-8hi--RiKnNi-8Wi--fiKysi-z4i--ciKnpi-8s; SUHB=0xnTI8TvtoONuG; ALF=1524620316; SSOLoginState=1493170767; _s_tentry=login.sina.com.cn; UOR=www.csdn.net,widget.weibo.com,code.cocoachina.com; YF-Page-G0=340a8661f2b409bf3ea4c8981c138854; Apache=5392543884216.043.1493189980535; ULV=1493189980561:11:7:4:5392543884216.043.1493189980535:1493084325040; YF-V5-G0=5f9bd778c31f9e6f413e97a1d464047a; YF-Ugrow-G0=9642b0b34b4c0d569ed7a372f8823a8e;";
     private String cookie;
-    // TODO 必填
-    //微博帐号
-    private String username = "444368875@qq.com";
-    // 微博密码
-    private String password = "lkx3551211";
-
 
     private String contentMatch = "http://weibo.com/p/aj/v6/mblog/mbloglist";
 
@@ -62,19 +61,19 @@ public class WeiBoProcessor implements PageProcessor {
 
     private String search_url = "http://s.weibo.com/weibo";
 
-    private AtomicInteger count = new AtomicInteger();
-
     //主域名
     public String BASE_Node_URL;
 
-    private WeiBoService weiBoService;
+    private ICrawlerService crawlerService;
 
     private String keyword;
 
-    public WeiBoProcessor(WeiBoService weiBoService, RequestTaskModel requestTaskModel) throws Exception {
+    public WeiBoProcessor(ICrawlerService crawlerService, RequestTaskModel requestTaskModel, String username, String password) throws Exception {
+        Assert.notNull(username, " 微博用户名称不能为空!");
+        Assert.notNull(password, " 微博用户密码不能为空!");
         this.BASE_Node_URL = requestTaskModel.getUrl();
         this.keyword = requestTaskModel.getKeyword();
-        this.weiBoService = weiBoService;
+        this.crawlerService = crawlerService;
         this.cookie = WeiBoUtils.login(username, password);
     }
 
@@ -121,7 +120,6 @@ public class WeiBoProcessor implements PageProcessor {
         } else {
             // 微博博主列表信息
             String url = page.getUrl().toString();
-//            System.out.println("url - > " + url);
             WbInsertModel model = new WbInsertModel();
             resolveUserInfo(page, model);
         }
@@ -129,6 +127,7 @@ public class WeiBoProcessor implements PageProcessor {
 
     /**
      * 抓取手机端传递过来的页面
+     *
      * @param page
      * @param model
      */
@@ -161,32 +160,70 @@ public class WeiBoProcessor implements PageProcessor {
         String url = mobileCommentUrl + "?id=" + id;
         Long start = System.currentTimeMillis();
         mobileCommentList(model, id, text, url, 0);
-        System.out.println("一共抓去耗时:" + (System.currentTimeMillis() - start));
+        logger.debug("一共抓取耗时:" + (System.currentTimeMillis() - start));
     }
 
+    /**
+     * 评论集合
+     *
+     * @param model
+     * @param topicId
+     * @param title
+     * @param url
+     * @param page
+     */
     private void mobileCommentList(WbInsertModel model, String topicId, String title, String url, int page) {
         StringBuffer sb = new StringBuffer(url);
         sb.append("&page=" + page);
-        System.out.println("请求参数:" + sb.toString());
+        logger.debug("请求参数:" + sb.toString());
         String resultData = HttpClientUtil.doGet(sb.toString());
-        JSONObject resultJson = JSON.parseObject(resultData);
+        JSONObject data = JSON.parseObject(resultData);
+        JSONObject resultJson = data.getJSONObject("data");
+        int max = resultJson.getInteger("max");
+        int count = resultJson.getInteger("total_number");
         JSONArray dataList = resultJson.getJSONArray("data");
+        logger.debug("当前请求获取到的数据大小 : " + dataList.size());
         if (dataList == null || dataList.size() == 0) {
-            System.out.println("★★★★★★★★★★★★★★★★★★" + resultJson.toJSONString());
             // 防止请求太快,返回不了正确的结果集!
             try {
                 Thread.sleep(2000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+            // 采用递归处理,将数据全部抓去到一次性添加到然后添加到数据库
             mobileCommentList(new WbInsertModel(), topicId, title, url, page);
             return;
         }
-        int max = resultJson.getInteger("max");
-        int count = resultJson.getInteger("total_number");
+        // 将数据进行划分
+        dataSplit(model, topicId, title, dataList);
+
+        // 将数据添加到数据库中
+        try {
+            crawlerService.insertData(model);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        if (page < max) {
+            int nextPage = page + 1;
+            mobileCommentList(new WbInsertModel(), topicId, title, url, nextPage);
+        }
+
+    }
+
+    /**
+     * 将数据进行划分之后,承装到model中
+     *
+     * @param model    容器
+     * @param topicId  话题编号
+     * @param title    标题
+     * @param dataList 数据集合
+     */
+    private void dataSplit(WbInsertModel model, String topicId, String title, JSONArray dataList) {
+        // 承装数据的两个集合, 分别是回复和评论
         List<WbReply> replyList = model.getReplyList();
         List<WbComments> commentsList = model.getCommentsList();
-
+        int filterCount = 0;
         for (int i = 0; i < dataList.size(); i++) {
             JSONObject jsonObject = dataList.getJSONObject(i);
 
@@ -194,6 +231,7 @@ public class WeiBoProcessor implements PageProcessor {
 
             // 默认高质量评论 字数必须大于10
             if (!CommentUtils.commentFilter(text)) {
+                filterCount++;
                 continue;
             }
             String id = jsonObject.getString("id");
@@ -236,20 +274,9 @@ public class WeiBoProcessor implements PageProcessor {
                 comments.setTopicText(title);
                 commentsList.add(comments);
             }
-            //System.out.println("第 [" + ((page * 10) + i) + "] --- 评论 : " + text);
         }
 
-        try {
-            weiBoService.insertData(model);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        if (page < max) {
-            int nextPage = page + 1;
-            mobileCommentList(new WbInsertModel(), topicId, title, url, nextPage);
-        }
-
+        logger.debug(" 评论被过滤掉 [" + filterCount + "] 个评论 , 可能是不太关注的无效评论");
     }
 
     /**
@@ -337,10 +364,16 @@ public class WeiBoProcessor implements PageProcessor {
         ///////////////////////////////为微博列表添加详情连接///////////////////////////////////
         List<String> allLinks = html.xpath("/html/body/div/div[1]/div[3]/div[2]/a[1]").links().all();
         page.addTargetRequests(allLinks);
-        System.out.println("resultJson - " + resultJson.toJSONString());
     }
 
 
+    /**
+     * 将script内容解析成一个html格式
+     *
+     * @param page
+     * @param indexOf
+     * @return
+     */
     private Html scripteResolveHtml(Page page, String indexOf) {
         List<String> scriptList = page.getHtml().xpath("/html/body/script").all();
         String script = "";
@@ -453,7 +486,7 @@ public class WeiBoProcessor implements PageProcessor {
         wbTopic.setSystemTime(new Date());
         wbTopic.setHomePage("http://weibo.com/" + userId);
         wbTopic.setUsername(username);
-        System.out.println("话题 ----> " + content);
+        logger.info("话题 ----> " + content);
         resolveComments(contentId, 1, model);
     }
 
@@ -505,10 +538,11 @@ public class WeiBoProcessor implements PageProcessor {
         List<String> userList = htmls.xpath("/html/body/div/div/div/div[2]/div[1]/a[1]").links().all();
         List<String> commentIdList = htmls.$("body > div > div > div", "comment_id").regex("\\S+").all();
         try {
+            String imgContent = "图片评论";
             for (int i = 0; i < contentList.size(); i++) {
 //            //////////////////////////////评论详情资料///////////////////////////////////
                 String content = contentList.get(i);
-                if (StringUtils.isBlank(content) || content.trim().equals("图片评论")) {
+                if (StringUtils.isBlank(content) || imgContent.equals(content.trim())) {
                     continue;
                 }
                 String likeCount = likeList.get(i);
@@ -583,10 +617,11 @@ public class WeiBoProcessor implements PageProcessor {
         // 评论编号
         List<String> commentIdList = html.$("body > div", "comment_id").regex("\\S+").all();
         int size = contentList.size();
+        String text = "图片评论";
         for (int i = 0; i < size; i++) {
             //////////////////////////////评论详情资料///////////////////////////////////
             String content = contentList.get(i);
-            if (StringUtils.isBlank(content) || content.trim().equals("图片评论")) {
+            if (StringUtils.isBlank(content) || content.trim().equals(text)) {
                 continue;
             }
             String likeCount = likeList.get(i);
@@ -619,14 +654,14 @@ public class WeiBoProcessor implements PageProcessor {
     }
 
     private Integer likeConverZero(String text) {
-        if (text == null || text.equals("赞")) {
+        if (text == null || "赞".equals(text)) {
             return 0;
         }
         return Integer.valueOf(text);
     }
 
     private Integer formatForwardCount(String text) {
-        if (StringUtils.isBlank(text) || text.equals("转发")) {
+        if (StringUtils.isBlank(text) || "转发".equals(text)) {
             return 0;
         }
         return Integer.valueOf(text);
@@ -682,11 +717,5 @@ public class WeiBoProcessor implements PageProcessor {
                     .addHeader("Cookie", cookie);
         }
         return site;
-    }
-
-
-    public static void main(String[] args) {
-        //http://weibo.com/topgirls8
-//        Spider.create(new WeiBoProcessor("http://weibo.com/1713926427/Etq2WnSiR?type=comment")).thread(5).run();
     }
 }

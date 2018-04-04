@@ -5,12 +5,14 @@ import com.model.common.RequestTaskModel;
 import com.model.common.ResultDTO;
 import com.model.task.TaskUrlList;
 import com.model.task.TaskUrlListExample;
-import com.service.*;
+import com.service.ICrawlerService;
+import com.service.TaskUrlListService;
 import com.utils.BaseConstans;
 import com.utils.IMapReceiveMail;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -31,16 +33,18 @@ public class TaskUrlListServiceImpl implements TaskUrlListService {
     private TaskUrlListMapper mapper;
 
     @Autowired
-    private ZhiHuService zhiHuService;
+    private ICrawlerService zhiHuService;
+
+    @Qualifier("weiBoService")
+    @Autowired
+    private ICrawlerService wangYiYunService;
 
     @Autowired
-    private IWangYiYunService wangYiYunService;
+    private ICrawlerService ttService;
 
+    @Qualifier("weiBoService")
     @Autowired
-    private TTService ttService;
-
-    @Autowired
-    private WeiBoService weiBoService;
+    private ICrawlerService weiBoService;
 
     public ResultDTO runTask() throws Exception {
         // 1 开始执行未完成的任务
@@ -54,9 +58,9 @@ public class TaskUrlListServiceImpl implements TaskUrlListService {
             String type = taskUrlList.getType();
             RequestTaskModel request = new RequestTaskModel();
             Integer searchType = taskUrlList.getSearchType();
-            if (BaseConstans.search_type_url == searchType) {
+            if (BaseConstans.search_type_url.equals(searchType)) {
                 request.setUrl(taskUrlList.getSearchKeyword());
-            } else if (BaseConstans.search_type_keyword == searchType) {
+            } else if (BaseConstans.search_type_keyword.equals(searchType)) {
                 request.setKeyword(taskUrlList.getSearchKeyword());
             } else {
                 logger.error("错误的类型! ----> " + searchType);
