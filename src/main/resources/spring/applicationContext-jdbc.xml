@@ -27,17 +27,17 @@
     <!-- 加载数据源 -->
     <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
         <property name="dataSource" ref="mysqlDataSource"/>
-        <property name="configLocation" value="classpath:dao-mybaties-mapper/mybatis-config.xml"/>
+        <property name="configLocation" value="classpath:mybatis/mybatis-config.xml"/>
         <property name="mapperLocations">
             <list>
-                <value>classpath:customize-mapper/mysql/*.xml</value>
+                <value>classpath:mybatis/mapper/*.xml</value>
             </list>
         </property>
     </bean>
 
-
+    <!-- 集成Spring 将接口类注入到Spring容器中,并且为该接口设置一个公共代理 -->
     <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
-        <property name="basePackage" value="com.dao"/> <!-- 默认扫描这些mapping类 -->
+        <property name="basePackage" value="com.crawler.dao"/> <!-- 默认扫描这些mapping类 -->
         <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"></property>
     </bean>
 

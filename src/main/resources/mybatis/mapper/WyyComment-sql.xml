@@ -1,0 +1,276 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.crawler.dao.WyyCommentMapper">
+    <resultMap id="BaseResultMap" type="com.crawler.model.WyyComment">
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="music_id" jdbcType="INTEGER" property="music_id"/>
+        <result column="music_url" jdbcType="VARCHAR" property="music_url"/>
+        <result column="comment_id" jdbcType="INTEGER" property="comment_id"/>
+        <result column="user_id" jdbcType="INTEGER" property="user_id"/>
+        <result column="like_count" jdbcType="INTEGER" property="like_count"/>
+        <result column="content" jdbcType="VARCHAR" property="content"/>
+        <result column="comment_time" jdbcType="TIMESTAMP" property="comment_time"/>
+        <result column="liked" jdbcType="VARCHAR" property="liked"/>
+    </resultMap>
+    <sql id="Example_Where_Clause">
+        <where>
+            <foreach collection="oredCriteria" item="criteria" separator="or">
+                <if test="criteria.valid">
+                    <trim prefix="(" prefixOverrides="and" suffix=")">
+                        <foreach collection="criteria.criteria" item="criterion">
+                            <choose>
+                                <when test="criterion.noValue">
+                                    and ${criterion.condition}
+                                </when>
+                                <when test="criterion.singleValue">
+                                    and ${criterion.condition} #{criterion.value}
+                                </when>
+                                <when test="criterion.betweenValue">
+                                    and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                                </when>
+                                <when test="criterion.listValue">
+                                    and ${criterion.condition}
+                                    <foreach close=")" collection="criterion.value" item="listItem" open="("
+                                             separator=",">
+                                        #{listItem}
+                                    </foreach>
+                                </when>
+                            </choose>
+                        </foreach>
+                    </trim>
+                </if>
+            </foreach>
+        </where>
+    </sql>
+    <sql id="Update_By_Example_Where_Clause">
+        <where>
+            <foreach collection="example.oredCriteria" item="criteria" separator="or">
+                <if test="criteria.valid">
+                    <trim prefix="(" prefixOverrides="and" suffix=")">
+                        <foreach collection="criteria.criteria" item="criterion">
+                            <choose>
+                                <when test="criterion.noValue">
+                                    and ${criterion.condition}
+                                </when>
+                                <when test="criterion.singleValue">
+                                    and ${criterion.condition} #{criterion.value}
+                                </when>
+                                <when test="criterion.betweenValue">
+                                    and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                                </when>
+                                <when test="criterion.listValue">
+                                    and ${criterion.condition}
+                                    <foreach close=")" collection="criterion.value" item="listItem" open="("
+                                             separator=",">
+                                        #{listItem}
+                                    </foreach>
+                                </when>
+                            </choose>
+                        </foreach>
+                    </trim>
+                </if>
+            </foreach>
+        </where>
+    </sql>
+    <sql id="Base_Column_List">
+    id, music_id, music_url, comment_id, user_id, like_count, content, comment_time, 
+    liked
+  </sql>
+    <select id="selectByExample" parameterType="com.crawler.model.WyyCommentExample" resultMap="BaseResultMap">
+        select
+        <if test="distinct">
+            distinct
+        </if>
+        <include refid="Base_Column_List"/>
+        from wyy_comment
+        <if test="_parameter != null">
+            <include refid="Example_Where_Clause"/>
+        </if>
+        <if test="orderByClause != null">
+            order by ${orderByClause}
+        </if>
+    </select>
+    <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from wyy_comment
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from wyy_comment
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+    <delete id="deleteByExample" parameterType="com.crawler.model.WyyCommentExample">
+        delete from wyy_comment
+        <if test="_parameter != null">
+            <include refid="Example_Where_Clause"/>
+        </if>
+    </delete>
+    <insert id="insert" parameterType="com.crawler.model.WyyComment">
+        <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+        insert into wyy_comment (music_id, music_url, comment_id,
+        user_id, like_count, content,
+        comment_time, liked)
+        values (#{music_id,jdbcType=INTEGER}, #{music_url,jdbcType=VARCHAR}, #{comment_id,jdbcType=INTEGER},
+        #{user_id,jdbcType=INTEGER}, #{like_count,jdbcType=INTEGER}, #{content,jdbcType=VARCHAR},
+        #{comment_time,jdbcType=TIMESTAMP}, #{liked,jdbcType=VARCHAR})
+    </insert>
+    <insert id="insertSelective" parameterType="com.crawler.model.WyyComment">
+        <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+        insert into wyy_comment
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="music_id != null">
+                music_id,
+            </if>
+            <if test="music_url != null">
+                music_url,
+            </if>
+            <if test="comment_id != null">
+                comment_id,
+            </if>
+            <if test="user_id != null">
+                user_id,
+            </if>
+            <if test="like_count != null">
+                like_count,
+            </if>
+            <if test="content != null">
+                content,
+            </if>
+            <if test="comment_time != null">
+                comment_time,
+            </if>
+            <if test="liked != null">
+                liked,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="music_id != null">
+                #{music_id,jdbcType=INTEGER},
+            </if>
+            <if test="music_url != null">
+                #{music_url,jdbcType=VARCHAR},
+            </if>
+            <if test="comment_id != null">
+                #{comment_id,jdbcType=INTEGER},
+            </if>
+            <if test="user_id != null">
+                #{user_id,jdbcType=INTEGER},
+            </if>
+            <if test="like_count != null">
+                #{like_count,jdbcType=INTEGER},
+            </if>
+            <if test="content != null">
+                #{content,jdbcType=VARCHAR},
+            </if>
+            <if test="comment_time != null">
+                #{comment_time,jdbcType=TIMESTAMP},
+            </if>
+            <if test="liked != null">
+                #{liked,jdbcType=VARCHAR},
+            </if>
+        </trim>
+    </insert>
+    <select id="countByExample" parameterType="com.crawler.model.WyyCommentExample" resultType="java.lang.Long">
+        select count(*) from wyy_comment
+        <if test="_parameter != null">
+            <include refid="Example_Where_Clause"/>
+        </if>
+    </select>
+    <update id="updateByExampleSelective" parameterType="map">
+        update wyy_comment
+        <set>
+            <if test="record.id != null">
+                id = #{record.id,jdbcType=INTEGER},
+            </if>
+            <if test="record.music_id != null">
+                music_id = #{record.music_id,jdbcType=INTEGER},
+            </if>
+            <if test="record.music_url != null">
+                music_url = #{record.music_url,jdbcType=VARCHAR},
+            </if>
+            <if test="record.comment_id != null">
+                comment_id = #{record.comment_id,jdbcType=INTEGER},
+            </if>
+            <if test="record.user_id != null">
+                user_id = #{record.user_id,jdbcType=INTEGER},
+            </if>
+            <if test="record.like_count != null">
+                like_count = #{record.like_count,jdbcType=INTEGER},
+            </if>
+            <if test="record.content != null">
+                content = #{record.content,jdbcType=VARCHAR},
+            </if>
+            <if test="record.comment_time != null">
+                comment_time = #{record.comment_time,jdbcType=TIMESTAMP},
+            </if>
+            <if test="record.liked != null">
+                liked = #{record.liked,jdbcType=VARCHAR},
+            </if>
+        </set>
+        <if test="_parameter != null">
+            <include refid="Update_By_Example_Where_Clause"/>
+        </if>
+    </update>
+    <update id="updateByExample" parameterType="map">
+        update wyy_comment
+        set id = #{record.id,jdbcType=INTEGER},
+        music_id = #{record.music_id,jdbcType=INTEGER},
+        music_url = #{record.music_url,jdbcType=VARCHAR},
+        comment_id = #{record.comment_id,jdbcType=INTEGER},
+        user_id = #{record.user_id,jdbcType=INTEGER},
+        like_count = #{record.like_count,jdbcType=INTEGER},
+        content = #{record.content,jdbcType=VARCHAR},
+        comment_time = #{record.comment_time,jdbcType=TIMESTAMP},
+        liked = #{record.liked,jdbcType=VARCHAR}
+        <if test="_parameter != null">
+            <include refid="Update_By_Example_Where_Clause"/>
+        </if>
+    </update>
+    <update id="updateByPrimaryKeySelective" parameterType="com.crawler.model.WyyComment">
+        update wyy_comment
+        <set>
+            <if test="music_id != null">
+                music_id = #{music_id,jdbcType=INTEGER},
+            </if>
+            <if test="music_url != null">
+                music_url = #{music_url,jdbcType=VARCHAR},
+            </if>
+            <if test="comment_id != null">
+                comment_id = #{comment_id,jdbcType=INTEGER},
+            </if>
+            <if test="user_id != null">
+                user_id = #{user_id,jdbcType=INTEGER},
+            </if>
+            <if test="like_count != null">
+                like_count = #{like_count,jdbcType=INTEGER},
+            </if>
+            <if test="content != null">
+                content = #{content,jdbcType=VARCHAR},
+            </if>
+            <if test="comment_time != null">
+                comment_time = #{comment_time,jdbcType=TIMESTAMP},
+            </if>
+            <if test="liked != null">
+                liked = #{liked,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.crawler.model.WyyComment">
+    update wyy_comment
+    set music_id = #{music_id,jdbcType=INTEGER},
+      music_url = #{music_url,jdbcType=VARCHAR},
+      comment_id = #{comment_id,jdbcType=INTEGER},
+      user_id = #{user_id,jdbcType=INTEGER},
+      like_count = #{like_count,jdbcType=INTEGER},
+      content = #{content,jdbcType=VARCHAR},
+      comment_time = #{comment_time,jdbcType=TIMESTAMP},
+      liked = #{liked,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

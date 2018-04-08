@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.crawler.dao.ZhAnswerCommentsMapper">
+  <resultMap id="BaseResultMap" type="com.crawler.model.zh.ZhAnswerComments">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <id column="comments_id" jdbcType="INTEGER" property="commentsId" />
+    <result column="user_id" jdbcType="VARCHAR" property="userId" />
+    <result column="vote_count" jdbcType="INTEGER" property="voteCount" />
+    <result column="answer_id" jdbcType="INTEGER" property="answerId" />
+    <result column="created_time" jdbcType="TIMESTAMP" property="createdTime" />
+    <result column="system_time" jdbcType="TIMESTAMP" property="systemTime" />
+  </resultMap>
+  <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="com.crawler.model.zh.ZhAnswerComments">
+    <result column="content" jdbcType="LONGVARCHAR" property="content" />
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    id, comments_id, user_id, vote_count, answer_id, created_time, system_time
+  </sql>
+  <sql id="Blob_Column_List">
+    content
+  </sql>
+  <select id="selectByExampleWithBLOBs" parameterType="com.crawler.model.zh.ZhAnswerCommentsExample" resultMap="ResultMapWithBLOBs">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from zh_answer_comments
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByExample" parameterType="com.crawler.model.zh.ZhAnswerCommentsExample" resultMap="BaseResultMap">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from zh_answer_comments
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" parameterType="com.crawler.model.zh.ZhAnswerCommentsKey" resultMap="ResultMapWithBLOBs">
+    select 
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from zh_answer_comments
+    where id = #{id,jdbcType=INTEGER}
+      and comments_id = #{commentsId,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="com.crawler.model.zh.ZhAnswerCommentsKey">
+    delete from zh_answer_comments
+    where id = #{id,jdbcType=INTEGER}
+      and comments_id = #{commentsId,jdbcType=INTEGER}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.crawler.model.zh.ZhAnswerCommentsExample">
+    delete from zh_answer_comments
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.crawler.model.zh.ZhAnswerComments">
+    <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into zh_answer_comments (comments_id, user_id, vote_count, 
+      answer_id, created_time, system_time, 
+      content)
+    values (#{commentsId,jdbcType=INTEGER}, #{userId,jdbcType=VARCHAR}, #{voteCount,jdbcType=INTEGER}, 
+      #{answerId,jdbcType=INTEGER}, #{createdTime,jdbcType=TIMESTAMP}, #{systemTime,jdbcType=TIMESTAMP}, 
+      #{content,jdbcType=LONGVARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.crawler.model.zh.ZhAnswerComments">
+    <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into zh_answer_comments
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="commentsId != null">
+        comments_id,
+      </if>
+      <if test="userId != null">
+        user_id,
+      </if>
+      <if test="voteCount != null">
+        vote_count,
+      </if>
+      <if test="answerId != null">
+        answer_id,
+      </if>
+      <if test="createdTime != null">
+        created_time,
+      </if>
+      <if test="systemTime != null">
+        system_time,
+      </if>
+      <if test="content != null">
+        content,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="commentsId != null">
+        #{commentsId,jdbcType=INTEGER},
+      </if>
+      <if test="userId != null">
+        #{userId,jdbcType=VARCHAR},
+      </if>
+      <if test="voteCount != null">
+        #{voteCount,jdbcType=INTEGER},
+      </if>
+      <if test="answerId != null">
+        #{answerId,jdbcType=INTEGER},
+      </if>
+      <if test="createdTime != null">
+        #{createdTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="systemTime != null">
+        #{systemTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="content != null">
+        #{content,jdbcType=LONGVARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.crawler.model.zh.ZhAnswerCommentsExample" resultType="java.lang.Long">
+    select count(*) from zh_answer_comments
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map">
+    update zh_answer_comments
+    <set>
+      <if test="record.id != null">
+        id = #{record.id,jdbcType=INTEGER},
+      </if>
+      <if test="record.commentsId != null">
+        comments_id = #{record.commentsId,jdbcType=INTEGER},
+      </if>
+      <if test="record.userId != null">
+        user_id = #{record.userId,jdbcType=VARCHAR},
+      </if>
+      <if test="record.voteCount != null">
+        vote_count = #{record.voteCount,jdbcType=INTEGER},
+      </if>
+      <if test="record.answerId != null">
+        answer_id = #{record.answerId,jdbcType=INTEGER},
+      </if>
+      <if test="record.createdTime != null">
+        created_time = #{record.createdTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.systemTime != null">
+        system_time = #{record.systemTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.content != null">
+        content = #{record.content,jdbcType=LONGVARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExampleWithBLOBs" parameterType="map">
+    update zh_answer_comments
+    set id = #{record.id,jdbcType=INTEGER},
+      comments_id = #{record.commentsId,jdbcType=INTEGER},
+      user_id = #{record.userId,jdbcType=VARCHAR},
+      vote_count = #{record.voteCount,jdbcType=INTEGER},
+      answer_id = #{record.answerId,jdbcType=INTEGER},
+      created_time = #{record.createdTime,jdbcType=TIMESTAMP},
+      system_time = #{record.systemTime,jdbcType=TIMESTAMP},
+      content = #{record.content,jdbcType=LONGVARCHAR}
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map">
+    update zh_answer_comments
+    set id = #{record.id,jdbcType=INTEGER},
+      comments_id = #{record.commentsId,jdbcType=INTEGER},
+      user_id = #{record.userId,jdbcType=VARCHAR},
+      vote_count = #{record.voteCount,jdbcType=INTEGER},
+      answer_id = #{record.answerId,jdbcType=INTEGER},
+      created_time = #{record.createdTime,jdbcType=TIMESTAMP},
+      system_time = #{record.systemTime,jdbcType=TIMESTAMP}
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.crawler.model.zh.ZhAnswerComments">
+    update zh_answer_comments
+    <set>
+      <if test="userId != null">
+        user_id = #{userId,jdbcType=VARCHAR},
+      </if>
+      <if test="voteCount != null">
+        vote_count = #{voteCount,jdbcType=INTEGER},
+      </if>
+      <if test="answerId != null">
+        answer_id = #{answerId,jdbcType=INTEGER},
+      </if>
+      <if test="createdTime != null">
+        created_time = #{createdTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="systemTime != null">
+        system_time = #{systemTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="content != null">
+        content = #{content,jdbcType=LONGVARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+      and comments_id = #{commentsId,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKeyWithBLOBs" parameterType="com.crawler.model.zh.ZhAnswerComments">
+    update zh_answer_comments
+    set user_id = #{userId,jdbcType=VARCHAR},
+      vote_count = #{voteCount,jdbcType=INTEGER},
+      answer_id = #{answerId,jdbcType=INTEGER},
+      created_time = #{createdTime,jdbcType=TIMESTAMP},
+      system_time = #{systemTime,jdbcType=TIMESTAMP},
+      content = #{content,jdbcType=LONGVARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+      and comments_id = #{commentsId,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.crawler.model.zh.ZhAnswerComments">
+    update zh_answer_comments
+    set user_id = #{userId,jdbcType=VARCHAR},
+      vote_count = #{voteCount,jdbcType=INTEGER},
+      answer_id = #{answerId,jdbcType=INTEGER},
+      created_time = #{createdTime,jdbcType=TIMESTAMP},
+      system_time = #{systemTime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+      and comments_id = #{commentsId,jdbcType=INTEGER}
+  </update>
+</mapper>
