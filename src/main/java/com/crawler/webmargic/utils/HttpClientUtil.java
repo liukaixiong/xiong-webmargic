@@ -199,8 +199,8 @@ public class HttpClientUtil {
                 UrlEncodedFormEntity entity = new UrlEncodedFormEntity(paramList);
                 httpPost.setEntity(entity);
             }
-            for (String key : params.keySet()) {
-                httpPost.addHeader(key, params.get(key).toString());
+            for (String key : header.keySet()) {
+                httpPost.addHeader(key, header.get(key).toString());
             }
             // 执行http请求
             response = httpClient.execute(httpPost);

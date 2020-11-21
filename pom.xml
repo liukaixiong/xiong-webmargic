@@ -49,6 +49,16 @@
     </build>
 
     <dependencies>
+        <dependency>
+            <groupId>com.vladsch.flexmark</groupId>
+            <artifactId>flexmark-all</artifactId>
+            <version>0.61.24</version>
+        </dependency>
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-all</artifactId>
+            <version>5.5.1</version>
+        </dependency>
         <!-- 发送邮件主要jar包 -->
         <dependency>
             <groupId>javax.mail</groupId>
