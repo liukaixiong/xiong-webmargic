@@ -20,7 +20,7 @@
     <properties>
         <java-version>1.8</java-version>
         <profiles.active>skyforest</profiles.active>
-        <springframework.version>4.3.7.RELEASE</springframework.version>
+        <springframework.version>5.3.19</springframework.version>
     </properties>
 
     <build>
